@@ -1,8 +1,9 @@
-import { BrowserModule } from '@angular/platform-browser';
+﻿import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
-@NgModule({ declarations: [AppComponent], imports: [BrowserModule, FormsModule, HttpClientModule],
+import { PagoFinalModule } from './pago-final/pago-final.module';
+@NgModule({ declarations: [AppComponent], imports: [BrowserModule, FormsModule, HttpClientModule, PagoFinalModule],
   bootstrap: [AppComponent] })
 export class AppModule {}

@@ -268,10 +268,18 @@
   </section>
   <section class="page-shell" *ngIf="vista === 'solicitud'">
     <h1>Mi solicitud</h1>
-    <div class="empty-state">
-      <h2>Inicia sesión para ver tus solicitudes</h2>
-      <button class="btn" (click)="solicitar()">Iniciar sesión</button>
-    </div>
+
+    <app-pago-final-reserva
+      *ngIf="reservaIdParaPago; else accesoSolicitudes"
+      [reservaId]="reservaIdParaPago">
+    </app-pago-final-reserva>
+
+    <ng-template #accesoSolicitudes>
+      <div class="empty-state">
+        <h2>Inicia sesión para ver tus solicitudes</h2>
+        <button class="btn" (click)="solicitar()">Iniciar sesión</button>
+      </div>
+    </ng-template>
   </section>
   <section class="page-shell info-page" *ngIf="vista === 'como'">
     <span class="eyebrow">DE LA IDEA AL TRABAJO TERMINADO</span>

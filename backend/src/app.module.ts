@@ -1,12 +1,17 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { CategoriasController } from './API/categorias.controller';
+import { PagoFinalModule } from './API/pago-final/pago-final.module';
 import { CategoriasRepository } from './CORE/categoria';
-import { CategoriasService } from './SERVICE/categorias.service';
-import { DbService } from './INFRASTRUCTURE/db.service';
+import { DatabaseModule } from './INFRASTRUCTURE/database.module';
 import { PostgresCategoriasRepository } from './INFRASTRUCTURE/postgres-categorias.repository';
+import { CategoriasService } from './SERVICE/categorias.service';
+
 @Module({
+  imports: [DatabaseModule, PagoFinalModule],
   controllers: [CategoriasController],
-  providers: [DbService, CategoriasService,
-    { provide: CategoriasRepository, useClass: PostgresCategoriasRepository }]
+  providers: [
+    CategoriasService,
+    { provide: CategoriasRepository, useClass: PostgresCategoriasRepository },
+  ],
 })
 export class AppModule {}

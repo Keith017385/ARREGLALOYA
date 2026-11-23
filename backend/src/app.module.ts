@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CategoriasController } from './API/categorias.controller';
 import { ComplementoAnticipoController } from './API/complemento-anticipo.controller';
+import { FinalizacionModule } from './API/finalizacion-servicio/finalizacion.module';
 import { ModificacionPrecioController } from './API/modificacion-precio.controller';
 import { CategoriasRepository } from './CORE/categoria';
+import { DatabaseModule } from './INFRASTRUCTURE/database.module';
 import { DbService } from './INFRASTRUCTURE/db.service';
 import { PostgresCategoriasRepository } from './INFRASTRUCTURE/postgres-categorias.repository';
 import { PostgresComplementoAnticipoRepository } from './INFRASTRUCTURE/postgres-complemento-anticipo.repository';
@@ -12,13 +14,13 @@ import { CategoriasService } from './SERVICE/categorias.service';
 import { ModificacionPrecioService } from './SERVICE/modificacion-precio.service';
 
 @Module({
+  imports: [DatabaseModule, FinalizacionModule],
   controllers: [
     CategoriasController,
     ModificacionPrecioController,
     ComplementoAnticipoController,
   ],
   providers: [
-    DbService,
     CategoriasService,
     {
       provide: CategoriasRepository,

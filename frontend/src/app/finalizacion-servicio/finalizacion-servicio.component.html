@@ -1,0 +1,41 @@
+<section *ngIf="reservaId && rol" class="empty-state" aria-label="Finalización del servicio">
+  <h2>Finalización del servicio</h2>
+
+  <div *ngIf="rol === 'trabajador'">
+    <p>Genera el código al terminar el trabajo y compártelo con el cliente.</p>
+
+    <button class="btn" type="button" (click)="emitir()" [disabled]="procesando">
+      {{ codigoEmitido ? 'Generar otro código' : 'Generar código' }}
+    </button>
+
+    <p *ngIf="codigoEmitido" role="status">
+      Código del servicio: <strong><code>{{ codigoEmitido }}</code></strong>
+    </p>
+    <p *ngIf="codigoEmitido">Solo el código más reciente es válido.</p>
+  </div>
+
+  <form *ngIf="rol === 'cliente' && !finalizacion" (ngSubmit)="confirmar()">
+    <p>
+      <label for="cu07-codigo">Código de finalización</label><br>
+      <input
+        id="cu07-codigo"
+        name="codigo"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        [(ngModel)]="codigoIngresado"
+        [disabled]="procesando"
+      >
+    </p>
+
+    <button class="btn" type="submit" [disabled]="procesando">
+      Confirmar finalización
+    </button>
+  </form>
+
+  <p *ngIf="finalizacion" role="status">
+    Servicio finalizado el {{ finalizacion.confirmadaEn | date:'short' }}.
+  </p>
+
+  <p *ngIf="error" role="alert">{{ error }}</p>
+</section>

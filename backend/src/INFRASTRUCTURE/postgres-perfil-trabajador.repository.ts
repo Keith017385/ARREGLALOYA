@@ -12,11 +12,11 @@ export class PostgresPerfilTrabajadorRepository extends PerfilTrabajadorReposito
   constructor(private readonly db: DbService) { super(); }
 
   async obtener(usuarioId: string): Promise<PerfilTrabajador | null> {
-    const sql = `SELECT p.usuario_id::text AS "usuarioId", p.nombre, p.telefono,
+    const sql = `SELECT t.usuario_id::text AS "usuarioId", p.nombre, p.telefono,
         p.correo_contacto AS "correoContacto", p.direccion, t.zona_id::text AS "zonaId"
-      FROM arreglalo.perfil_usuario p
-      JOIN arreglalo.trabajador t ON t.usuario_id = p.usuario_id
-      WHERE p.usuario_id = $1::bigint`;
+      FROM arreglalo.trabajador t
+      LEFT JOIN arreglalo.perfil_usuario p ON p.usuario_id = t.usuario_id
+      WHERE t.usuario_id = $1::bigint`;
     try {
       const r = await this.db.pool.query<PerfilTrabajador>(sql, [usuarioId]);
       return r.rows[0] ?? null;
@@ -26,10 +26,13 @@ export class PostgresPerfilTrabajadorRepository extends PerfilTrabajadorReposito
   }
 
   async actualizar(usuarioId: string, datos: DatosPerfil): Promise<PerfilTrabajador | null> {
-    const sql = `UPDATE arreglalo.perfil_usuario
-      SET nombre = $2, telefono = $3, correo_contacto = $4, direccion = $5
-      WHERE usuario_id = $1::bigint
-        AND EXISTS (SELECT 1 FROM arreglalo.trabajador WHERE usuario_id = $1::bigint)`;
+    const sql = `INSERT INTO arreglalo.perfil_usuario
+        (usuario_id, nombre, telefono, correo_contacto, direccion)
+      SELECT $1::bigint, $2::text, $3::text, $4::text, $5::text
+      WHERE EXISTS (SELECT 1 FROM arreglalo.trabajador WHERE usuario_id = $1::bigint)
+      ON CONFLICT (usuario_id) DO UPDATE
+      SET nombre = EXCLUDED.nombre, telefono = EXCLUDED.telefono,
+          correo_contacto = EXCLUDED.correo_contacto, direccion = EXCLUDED.direccion`;
     try {
       const r = await this.db.pool.query(sql, [
         usuarioId, datos.nombre, datos.telefono, datos.correoContacto, datos.direccion,

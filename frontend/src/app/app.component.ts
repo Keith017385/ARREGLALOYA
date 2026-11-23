@@ -14,7 +14,13 @@ export class AppComponent implements OnInit, OnDestroy {
   trabajador: TrabajadorDemo = TRABAJADORES_DEMO[0];
   trabajadores = TRABAJADORES_DEMO;
   constructor(private readonly catalogo: CatalogoService) {}
-  ngOnInit() { this.cargar(); }
+  ngOnInit(): void {
+    const parametros = new URLSearchParams(window.location.search);
+    if (parametros.get('incidentes') === '1') {
+      this.navegar('incidentes');
+    }
+    this.cargar();
+  }
   ngOnDestroy() { if (this.consulta) { this.consulta.unsubscribe(); } }
   cargar() {
     if (this.consulta) { this.consulta.unsubscribe(); }

@@ -13,8 +13,66 @@ export class AppComponent implements OnInit, OnDestroy {
   seleccion = 'Plomería'; modal = ''; menuAbierto = false;
   trabajador: TrabajadorDemo = TRABAJADORES_DEMO[0];
   trabajadores = TRABAJADORES_DEMO;
+  // Vistas de casos de uso: cada API valida permisos en el servidor.
+  tipoOperacion = '';
+  reservaIdOperacion = '';
+  reservaIdConsulta = '';
+  calificacionIdParaOpinion = '';
+  rolFinalizacion: 'cliente' | 'trabajador' = 'cliente';
+  propuestaIdConsulta = '';
+
   constructor(private readonly catalogo: CatalogoService) {}
-  ngOnInit() { this.cargar(); }
+  ngOnInit(): void {
+    const parametros = new URLSearchParams(window.location.search);
+    const casosReserva: Array<[string, string]> = [
+      ['reserva', 'pago'],
+      ['calificarReserva', 'calificacion'],
+      ['reclamoReserva', 'reclamo'],
+      ['asistenciaReserva', 'asistencia'],
+      ['cancelarReserva', 'cancelacion'],
+      ['modificarReserva', 'modificacion'],
+      ['finalizarReserva', 'finalizacion'],
+    ];
+    for (const [clave, operacion] of casosReserva) {
+      const id = parametros.get(clave);
+      if (id && /^[1-9][0-9]{0,18}$/.test(id)) {
+        this.reservaIdOperacion = id;
+        this.reservaIdConsulta = id;
+        this.tipoOperacion = operacion;
+        if (operacion === 'finalizacion') {
+          this.rolFinalizacion = parametros.get('rol') === 'trabajador' ? 'trabajador' : 'cliente';
+        }
+        this.navegar('solicitud');
+        break;
+      }
+    }
+    const calificacion = parametros.get('opinionCalificacion');
+    if (calificacion && /^[1-9][0-9]{0,18}$/.test(calificacion)) {
+      this.calificacionIdParaOpinion = calificacion;
+      this.navegar('opinion-servicio');
+    } else if (parametros.get('avisosCancelacion') === '1') {
+      this.navegar('avisos-cancelacion');
+    } else if (parametros.get('revisionPagos') === '1') {
+      this.navegar('revision-pagos');
+    } else if (parametros.get('incidentes') === '1') {
+      this.navegar('incidentes');
+    } else if (parametros.get('revisionesAsistencia') === '1') {
+      this.navegar('revisiones-asistencia');
+    } else if (parametros.get('candidatosAsistencia') === '1') {
+      this.navegar('candidatos-asistencia');
+    }
+    this.cargar();
+  }
+  abrirOperacion(operacion: string): void {
+    if (!/^[1-9][0-9]{0,18}$/.test(this.reservaIdConsulta)) {
+      this.error = 'Introduce un ID de reserva numérico válido.';
+      return;
+    }
+    this.error = '';
+    this.reservaIdOperacion = this.reservaIdConsulta;
+    this.tipoOperacion = operacion;
+  }
+
   ngOnDestroy() { if (this.consulta) { this.consulta.unsubscribe(); } }
   cargar() {
     if (this.consulta) { this.consulta.unsubscribe(); }

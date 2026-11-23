@@ -272,8 +272,36 @@
       <h2>Inicia sesión para ver tus solicitudes</h2>
       <button class="btn" (click)="solicitar()">Iniciar sesión</button>
     </div>
-    <app-modificacion-precio></app-modificacion-precio>
+    <div class="empty-state" *ngIf="!tipoOperacion">
+      <p>Las operaciones privadas requieren autenticación real. Mientras no se implemente, la API responderá 401.</p>
+      <label for="id-reserva-prueba">ID de reserva para revisar vistas técnicas</label>
+      <input id="id-reserva-prueba" type="text" name="idReservaPrueba" [(ngModel)]="reservaIdConsulta">
+      <p *ngIf="error" role="alert">{{ error }}</p>
+      <div class="actions">
+        <button type="button" (click)="abrirOperacion('modificacion')">CU-06 Precio</button>
+        <button type="button" (click)="abrirOperacion('finalizacion')">CU-07 Finalización</button>
+        <button type="button" (click)="abrirOperacion('pago')">CU-08 Pago</button>
+        <button type="button" (click)="abrirOperacion('calificacion')">CU-09 Calificación</button>
+        <button type="button" (click)="abrirOperacion('reclamo')">CU-10 Reclamo</button>
+        <button type="button" (click)="abrirOperacion('asistencia')">CU-11 Asistencia</button>
+        <button type="button" (click)="abrirOperacion('cancelacion')">CU-21 Cancelación</button>
+      </div>
+    </div>
+    <button *ngIf="tipoOperacion" type="button" (click)="tipoOperacion=''">Volver a las operaciones</button>
+    <app-modificacion-precio-conectada *ngIf="tipoOperacion === 'modificacion'" [reservaId]="reservaIdOperacion"></app-modificacion-precio-conectada>
+    <app-finalizacion-servicio *ngIf="tipoOperacion === 'finalizacion'" [reservaId]="reservaIdOperacion" [rol]="rolFinalizacion"></app-finalizacion-servicio>
+    <app-pago-final-reserva *ngIf="tipoOperacion === 'pago'" [reservaId]="reservaIdOperacion"></app-pago-final-reserva>
+    <app-calificacion-opinion *ngIf="tipoOperacion === 'calificacion'" [reservaId]="reservaIdOperacion"></app-calificacion-opinion>
+    <app-reclamo-formal *ngIf="tipoOperacion === 'reclamo'" [reservaId]="reservaIdOperacion"></app-reclamo-formal>
+    <app-declaracion-asistencia *ngIf="tipoOperacion === 'asistencia'" [reservaId]="reservaIdOperacion"></app-declaracion-asistencia>
+    <app-cancelacion-cliente *ngIf="tipoOperacion === 'cancelacion'" [reservaId]="reservaIdOperacion"></app-cancelacion-cliente>
   </section>
+  <section class="page-shell" *ngIf="vista === 'avisos-cancelacion'"><app-avisos-cancelacion></app-avisos-cancelacion></section>
+  <section class="page-shell" *ngIf="vista === 'revision-pagos'"><app-revision-discrepancias-pago></app-revision-discrepancias-pago></section>
+  <section class="page-shell" *ngIf="vista === 'incidentes'"><app-incidentes-sanciones></app-incidentes-sanciones></section>
+  <section class="page-shell" *ngIf="vista === 'revisiones-asistencia'"><app-gestion-revision-asistencia></app-gestion-revision-asistencia></section>
+  <section class="page-shell" *ngIf="vista === 'candidatos-asistencia'"><app-candidatos-asistencia></app-candidatos-asistencia></section>
+  <section class="page-shell" *ngIf="vista === 'opinion-servicio'"><app-respuesta-opinion [calificacionId]="calificacionIdParaOpinion"></app-respuesta-opinion></section>
   <section class="page-shell info-page" *ngIf="vista === 'como'">
     <span class="eyebrow">DE LA IDEA AL TRABAJO TERMINADO</span>
     <h1>¿Cómo funciona?</h1>

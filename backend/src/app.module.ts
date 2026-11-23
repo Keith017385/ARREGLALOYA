@@ -17,7 +17,7 @@ import { RevisionDiscrepanciasPagoService } from './SERVICE/revision-discrepanci
 import { IncidentesSancionesController } from './API/incidentes-sanciones/incidentes-sanciones.controller';
 import { PostgresIncidentesSancionesRepository } from './INFRASTRUCTURE/incidentes-sanciones/postgres-incidentes-sanciones.repository';
 import { IncidentesSancionesService } from './SERVICE/incidentes-sanciones/incidentes-sanciones.service';
-import { CandidatosAsistenciaController, GestionRevisionAsistenciaController } from './API/casos-escalados/gestion-revision-asistencia.controller';
+import { GestionRevisionAsistenciaController } from './API/casos-escalados/gestion-revision-asistencia.controller';
 import { PostgresGestionRevisionAsistenciaRepository } from './INFRASTRUCTURE/casos-escalados/postgres-gestion-revision-asistencia.repository';
 import { GestionRevisionAsistenciaService } from './SERVICE/casos-escalados/gestion-revision-asistencia.service';
 import { RespuestaOpinionController } from './API/respuesta-opinion/respuesta-opinion.controller';

@@ -266,6 +266,10 @@
       </aside>
     </div>
   </section>
+  <section class="page-shell" *ngIf="vista === 'revision-pagos'">
+    <app-revision-discrepancias-pago></app-revision-discrepancias-pago>
+  </section>
+
   <section class="page-shell" *ngIf="vista === 'solicitud'">
     <h1>Mi solicitud</h1>
     <div class="empty-state">

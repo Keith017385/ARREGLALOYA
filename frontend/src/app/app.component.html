@@ -266,7 +266,12 @@
       </aside>
     </div>
   </section>
-  <section class="page-shell" *ngIf="vista === 'solicitud'">
+  <section class="page-shell" *ngIf="vista === 'solicitud' && reservaIdParaReclamo">
+    <h1>Mi solicitud</h1>
+    <app-reclamo-formal [reservaId]="reservaIdParaReclamo"></app-reclamo-formal>
+  </section>
+
+  <section class="page-shell" *ngIf="vista === 'solicitud' && !reservaIdParaReclamo">
     <h1>Mi solicitud</h1>
     <div class="empty-state">
       <h2>Inicia sesión para ver tus solicitudes</h2>

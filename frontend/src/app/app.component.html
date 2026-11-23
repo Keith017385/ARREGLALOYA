@@ -266,6 +266,14 @@
       </aside>
     </div>
   </section>
+  <section class="page-shell" *ngIf="vista === 'revisiones-asistencia'">
+    <app-gestion-revision-asistencia></app-gestion-revision-asistencia>
+  </section>
+
+  <section class="page-shell" *ngIf="vista === 'candidatos-asistencia'">
+    <app-candidatos-asistencia></app-candidatos-asistencia>
+  </section>
+
   <section class="page-shell" *ngIf="vista === 'solicitud'">
     <h1>Mi solicitud</h1>
     <div class="empty-state">

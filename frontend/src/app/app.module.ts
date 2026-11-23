@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
-@NgModule({ declarations: [AppComponent], imports: [BrowserModule, FormsModule, HttpClientModule],
+import { CandidatosAsistenciaModule } from './casos-escalados/candidatos-asistencia.module';
+@NgModule({ declarations: [AppComponent], imports: [BrowserModule, FormsModule, HttpClientModule, CandidatosAsistenciaModule],
   bootstrap: [AppComponent] })
 export class AppModule {}

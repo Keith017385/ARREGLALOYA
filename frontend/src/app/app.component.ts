@@ -14,7 +14,21 @@ export class AppComponent implements OnInit, OnDestroy {
   trabajador: TrabajadorDemo = TRABAJADORES_DEMO[0];
   trabajadores = TRABAJADORES_DEMO;
   constructor(private readonly catalogo: CatalogoService) {}
-  ngOnInit() { this.cargar(); }
+  reservaIdParaCancelar = '';
+
+  ngOnInit(): void {
+    const parametros = new URLSearchParams(window.location.search);
+    if (parametros.get('avisosCancelacion') === '1') {
+      this.navegar('avisos-cancelacion');
+    }
+
+    const reservaId = parametros.get('cancelarReserva');
+    if (reservaId && /^[1-9][0-9]{0,18}$/.test(reservaId)) {
+      this.reservaIdParaCancelar = reservaId;
+      this.navegar('solicitud');
+    }
+    this.cargar();
+  }
   ngOnDestroy() { if (this.consulta) { this.consulta.unsubscribe(); } }
   cargar() {
     if (this.consulta) { this.consulta.unsubscribe(); }

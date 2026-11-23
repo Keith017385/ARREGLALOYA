@@ -266,7 +266,16 @@
       </aside>
     </div>
   </section>
-  <section class="page-shell" *ngIf="vista === 'solicitud'">
+  <section class="page-shell" *ngIf="vista === 'avisos-cancelacion'">
+    <app-avisos-cancelacion></app-avisos-cancelacion>
+  </section>
+
+  <section class="page-shell" *ngIf="vista === 'solicitud' && reservaIdParaCancelar">
+    <h1>Mi solicitud</h1>
+    <app-cancelacion-cliente [reservaId]="reservaIdParaCancelar"></app-cancelacion-cliente>
+  </section>
+
+  <section class="page-shell" *ngIf="vista === 'solicitud' && !reservaIdParaCancelar">
     <h1>Mi solicitud</h1>
     <div class="empty-state">
       <h2>Inicia sesión para ver tus solicitudes</h2>
@@ -307,6 +316,7 @@
   </a>
   <span>Cuidamos lo que llamas hogar.</span>
   <button (click)="navegar('solicitud')">Mi solicitud</button>
+  <a href="?avisosCancelacion=1">Avisos de cancelación</a>
   <small>Cochabamba, Bolivia</small>
 </footer>
 <div class="modal-backdrop" *ngIf="modal" (click)="modal=''">

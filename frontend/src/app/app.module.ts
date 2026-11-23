@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
-@NgModule({ declarations: [AppComponent], imports: [BrowserModule, FormsModule, HttpClientModule],
+import { CancelacionClienteModule } from './cancelacion-cliente/cancelacion-cliente.module';
+@NgModule({ declarations: [AppComponent], imports: [BrowserModule, FormsModule, HttpClientModule, CancelacionClienteModule],
   bootstrap: [AppComponent] })
 export class AppModule {}

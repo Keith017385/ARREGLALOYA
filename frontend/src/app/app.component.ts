@@ -14,7 +14,17 @@ export class AppComponent implements OnInit, OnDestroy {
   trabajador: TrabajadorDemo = TRABAJADORES_DEMO[0];
   trabajadores = TRABAJADORES_DEMO;
   constructor(private readonly catalogo: CatalogoService) {}
-  ngOnInit() { this.cargar(); }
+  calificacionIdParaOpinion = '';
+
+  ngOnInit(): void {
+    const id = new URLSearchParams(window.location.search).get('opinionCalificacion');
+    if (id && /^[1-9][0-9]{0,18}$/.test(id)) {
+      this.calificacionIdParaOpinion = id;
+      this.navegar('opinion-servicio');
+    }
+
+    this.cargar();
+  }
   ngOnDestroy() { if (this.consulta) { this.consulta.unsubscribe(); } }
   cargar() {
     if (this.consulta) { this.consulta.unsubscribe(); }

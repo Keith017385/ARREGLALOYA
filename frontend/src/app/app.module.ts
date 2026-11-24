@@ -17,9 +17,10 @@ import { ModificacionPrecioComponent } from './modificacion-precio/modificacion-
 import { ModificacionPrecioConectadaComponent } from './modificacion-precio/modificacion-precio-conectada.component';
 import { PerfilTrabajadorComponent } from './trabajadores/perfil-trabajador.component';
 import { DocumentosTrabajadorComponent } from './trabajadores/documentos-trabajador.component';
+import { SolicitudesTrabajadorComponent } from './trabajadores/solicitudes-trabajador.component';
 
 @NgModule({
-  declarations: [AppComponent, ModificacionPrecioComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent],
+  declarations: [AppComponent, ModificacionPrecioComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent, SolicitudesTrabajadorComponent],
   imports: [
     BrowserModule,
     FormsModule,

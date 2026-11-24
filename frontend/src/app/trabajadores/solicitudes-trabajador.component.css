@@ -1,0 +1,142 @@
+
+.solicitudes-container {
+  padding: 30px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.encabezado h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  color: #29243d;
+}
+
+.encabezado p {
+  color: #777;
+  margin: 0;
+}
+
+.btn-actualizar {
+  background: #7044c5;
+  color: white;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-actualizar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mensaje {
+  padding: 25px;
+  text-align: center;
+  background: #f7f5fb;
+  border-radius: 10px;
+  color: #555;
+}
+
+.error {
+  background: #fff0f0;
+  color: #b42318;
+}
+
+.vacio h3 {
+  color: #39314d;
+}
+
+.lista-solicitudes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.solicitud-card {
+  padding: 22px;
+  border: 1px solid #e5e1ed;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.estado {
+  background: #e7f6eb;
+  color: #217a3a;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.urgente {
+  background: #fff0e8;
+  color: #c04b20;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.solicitud-card h2 {
+  font-size: 20px;
+  color: #342b4a;
+}
+
+.descripcion {
+  color: #555;
+  line-height: 1.6;
+}
+
+.datos {
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+  margin: 15px 0;
+}
+
+.datos p {
+  font-size: 14px;
+  color: #555;
+}
+
+.servicios h3 {
+  font-size: 16px;
+  color: #342b4a;
+}
+
+.servicio-item {
+  background: #f7f5fb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.servicio-item p {
+  font-size: 13px;
+  color: #666;
+}
+
+@media (max-width: 600px) {
+  .solicitudes-container {
+    padding: 16px;
+  }
+
+  .encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

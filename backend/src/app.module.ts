@@ -48,6 +48,9 @@ import { DocumentoVerificacionController } from './API/documento-verificacion.co
 import { DocumentoVerificacionRepository } from './CORE/documento-verificacion';
 import { PostgresDocumentoVerificacionRepository } from './INFRASTRUCTURE/postgres-documento-verificacion.repository';
 import { DocumentoVerificacionService } from './SERVICE/documento-verificacion.service';
+import { SolicitudDisponibleController } from './API/solicitud-disponible.controller';
+import { PostgresSolicitudDisponibleRepository } from './INFRASTRUCTURE/postgres-solicitud-disponible.repository';
+import { SolicitudDisponibleService } from './SERVICE/solicitud-disponible.service';
 
 @Module({
   imports: [DatabaseModule, FinalizacionModule, PagoFinalModule],
@@ -69,11 +72,14 @@ import { DocumentoVerificacionService } from './SERVICE/documento-verificacion.s
     CandidatosAsistenciaController,
     PerfilTrabajadorController,
     DocumentoVerificacionController,
+    SolicitudDisponibleController,
   ],
   providers: [
     CategoriasService,
     PerfilTrabajadorService,
     DocumentoVerificacionService,
+    PostgresSolicitudDisponibleRepository,
+    SolicitudDisponibleService,
     {
       provide: CalificacionOpinionService,
       useFactory: (db: DbService) => new CalificacionOpinionService(new PostgresCalificacionOpinionRepository(db.pool)),

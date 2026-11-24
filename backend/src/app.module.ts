@@ -11,6 +11,9 @@ import { DeclaracionAsistenciaService } from './SERVICE/declaracion-asistencia/d
 import { AvisosCancelacionController, CancelacionClienteController } from './API/cancelacion-cliente/cancelacion-cliente.controller';
 import { PostgresCancelacionClienteRepository } from './INFRASTRUCTURE/cancelacion-cliente/postgres-cancelacion-cliente.repository';
 import { CancelacionClienteService } from './SERVICE/cancelacion-cliente/cancelacion-cliente.service';
+import { CancelacionTrabajadorController } from './API/cancelacion-trabajador/cancelacion-trabajador.controller';
+import { PostgresCancelacionTrabajadorRepository } from './INFRASTRUCTURE/cancelacion-trabajador/postgres-cancelacion-trabajador.repository';
+import { CancelacionTrabajadorService } from './SERVICE/cancelacion-trabajador/cancelacion-trabajador.service';
 import { RevisionDiscrepanciasPagoController } from './API/revision-discrepancias-pago/revision-discrepancias-pago.controller';
 import { PostgresRevisionDiscrepanciasPagoRepository } from './INFRASTRUCTURE/revision-discrepancias-pago/postgres-revision-discrepancias-pago.repository';
 import { RevisionDiscrepanciasPagoService } from './SERVICE/revision-discrepancias-pago/revision-discrepancias-pago.service';
@@ -53,6 +56,7 @@ import { ModificacionPrecioService } from './SERVICE/modificacion-precio.service
     RevisionAsistenciaController,
     AvisosCancelacionController,
     CancelacionClienteController,
+    CancelacionTrabajadorController,
     RevisionDiscrepanciasPagoController,
     IncidentesSancionesController,
     CandidatosAsistenciaController,
@@ -80,6 +84,11 @@ import { ModificacionPrecioService } from './SERVICE/modificacion-precio.service
     {
       provide: CancelacionClienteService,
       useFactory: (db: DbService) => new CancelacionClienteService(new PostgresCancelacionClienteRepository(db.pool)),
+      inject: [DbService],
+    },
+    {
+      provide: CancelacionTrabajadorService,
+      useFactory: (db: DbService) => new CancelacionTrabajadorService(new PostgresCancelacionTrabajadorRepository(db.pool)),
       inject: [DbService],
     },
     {

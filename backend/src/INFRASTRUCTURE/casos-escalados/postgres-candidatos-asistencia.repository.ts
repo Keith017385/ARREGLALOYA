@@ -1,14 +1,7 @@
 ﻿import type { Pool } from 'pg';
+import type { CandidatoAsistencia, CandidatosAsistenciaRepository } from '../../CORE/casos-escalados/candidatos-asistencia.repository';
 
-export interface CandidatoAsistencia {
-  respuestaId: string;
-  asistenciaId: string;
-  reservaId: string;
-  rechazadaEn: Date;
-  fechaVencimientoBolivia: string;
-}
-
-export class PostgresCandidatosAsistenciaRepository {
+export class PostgresCandidatosAsistenciaRepository implements CandidatosAsistenciaRepository {
   constructor(private readonly pool: Pool) {}
 
   async listarVencidos(actorId: string): Promise<CandidatoAsistencia[] | null> {

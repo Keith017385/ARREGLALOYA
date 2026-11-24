@@ -4,6 +4,7 @@ import { Categoria } from './catalogo/categoria';
 import { TrabajadorDemo } from './trabajadores/trabajador-demo';
 import { CatalogoService } from './catalogo/catalogo.service';
 import { TRABAJADORES_DEMO } from './trabajadores/demostracion';
+
 @Component({ selector: 'app-root', templateUrl: './app.component.html' })
 export class AppComponent implements OnInit, OnDestroy {
   vista = 'inicio'; q = ''; categorias: Categoria[] = [];
@@ -22,6 +23,7 @@ export class AppComponent implements OnInit, OnDestroy {
   propuestaIdConsulta = '';
 
   constructor(private readonly catalogo: CatalogoService) {}
+
   ngOnInit(): void {
     const parametros = new URLSearchParams(window.location.search);
     const casosReserva: Array<[string, string]> = [
@@ -30,6 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
       ['reclamoReserva', 'reclamo'],
       ['asistenciaReserva', 'asistencia'],
       ['cancelarReserva', 'cancelacion'],
+      ['cancelarServicioReserva', 'cancelacion-trabajador'],
       ['modificarReserva', 'modificacion'],
       ['finalizarReserva', 'finalizacion'],
     ];
@@ -63,6 +66,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
     this.cargar();
   }
+
   abrirOperacion(operacion: string): void {
     if (!/^[1-9][0-9]{0,18}$/.test(this.reservaIdConsulta)) {
       this.error = 'Introduce un ID de reserva numérico válido.';
@@ -74,6 +78,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() { if (this.consulta) { this.consulta.unsubscribe(); } }
+
   cargar() {
     if (this.consulta) { this.consulta.unsubscribe(); }
     const busqueda = this.q.trim();
@@ -87,18 +92,22 @@ export class AppComponent implements OnInit, OnDestroy {
       () => { this.categorias = []; this.error = 'No pudimos cargar los servicios. Comprueba la conexión y vuelve a intentar.'; this.cargando = false; }
     );
   }
+
   navegar(vista: string) {
     this.vista = vista; this.menuAbierto = false; window.scrollTo(0, 0);
     if (vista === 'inicio' && this.q) { this.filtrar(''); }
   }
+
   buscar() { this.categoriaActiva = ''; this.navegar('servicios'); this.cargar(); }
   filtrar(categoria: string) { this.categoriaActiva = categoria; this.q = categoria; this.cargar(); }
   elegir(categoria: Categoria) { this.seleccion = categoria.nombre; this.navegar('trabajadores'); }
   perfil(trabajador: TrabajadorDemo) { this.trabajador = trabajador; this.modal = 'perfil'; }
+
   solicitar() {
     // El acceso a solicitudes se habilitará con autenticación real.
     this.modal = 'sesion-requerida';
   }
+
   icono(nombre: string) {
     const texto = nombre.toLowerCase();
     if (texto.includes('plom')) { return 'plomeria'; }

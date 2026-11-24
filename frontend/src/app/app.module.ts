@@ -8,6 +8,7 @@ import { CalificacionOpinionModule } from './calificacion-opinion/calificacion-o
 import { ReclamoFormalModule } from './reclamo-formal/reclamo-formal.module';
 import { DeclaracionAsistenciaModule } from './declaracion-asistencia/declaracion-asistencia.module';
 import { CancelacionClienteModule } from './cancelacion-cliente/cancelacion-cliente.module';
+import { CancelacionTrabajadorModule } from './cancelacion-trabajador/cancelacion-trabajador.module';
 import { RevisionDiscrepanciasPagoModule } from './revision-discrepancias-pago/revision-discrepancias-pago.module';
 import { IncidentesSancionesModule } from './incidentes-sanciones/incidentes-sanciones.module';
 import { CandidatosAsistenciaModule } from './casos-escalados/candidatos-asistencia.module';
@@ -28,6 +29,7 @@ import { ModificacionPrecioConectadaComponent } from './modificacion-precio/modi
     ReclamoFormalModule,
     DeclaracionAsistenciaModule,
     CancelacionClienteModule,
+    CancelacionTrabajadorModule,
     RevisionDiscrepanciasPagoModule,
     IncidentesSancionesModule,
     CandidatosAsistenciaModule,

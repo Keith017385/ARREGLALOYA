@@ -48,10 +48,6 @@ import { DocumentoVerificacionController } from './API/documento-verificacion.co
 import { DocumentoVerificacionRepository } from './CORE/documento-verificacion';
 import { PostgresDocumentoVerificacionRepository } from './INFRASTRUCTURE/postgres-documento-verificacion.repository';
 import { DocumentoVerificacionService } from './SERVICE/documento-verificacion.service';
-import { CuentaTrabajadorController } from './API/cuenta-trabajador.controller';
-import { CuentaTrabajadorRepository } from './CORE/cuenta-trabajador';
-import { PostgresCuentaTrabajadorRepository } from './INFRASTRUCTURE/postgres-cuenta-trabajador.repository';
-import { CuentaTrabajadorService } from './SERVICE/cuenta-trabajador.service';
 import { SolicitudDisponibleController } from './API/solicitud-disponible.controller';
 import { PostgresSolicitudDisponibleRepository } from './INFRASTRUCTURE/postgres-solicitud-disponible.repository';
 import { SolicitudDisponibleService } from './SERVICE/solicitud-disponible.service';
@@ -76,14 +72,12 @@ import { SolicitudDisponibleService } from './SERVICE/solicitud-disponible.servi
     CandidatosAsistenciaController,
     PerfilTrabajadorController,
     DocumentoVerificacionController,
-    CuentaTrabajadorController,
     SolicitudDisponibleController,
   ],
   providers: [
     CategoriasService,
     PerfilTrabajadorService,
     DocumentoVerificacionService,
-    CuentaTrabajadorService,
     PostgresSolicitudDisponibleRepository,
     SolicitudDisponibleService,
     {
@@ -142,10 +136,6 @@ import { SolicitudDisponibleService } from './SERVICE/solicitud-disponible.servi
         {
       provide: DocumentoVerificacionRepository,
       useClass: PostgresDocumentoVerificacionRepository,
-    },
-        {
-      provide: CuentaTrabajadorRepository,
-      useClass: PostgresCuentaTrabajadorRepository,
     },
     {
       provide: PostgresModificacionPrecioRepository,

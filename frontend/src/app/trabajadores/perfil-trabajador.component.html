@@ -1,0 +1,36 @@
+<section class="page-shell">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">MI CUENTA DE TRABAJADOR</span>
+      <h1>Mi perfil y servicios</h1>
+      <p class="muted">Completa tus datos y elige los servicios que ofreces.</p>
+    </div>
+  </div>
+  <p role="status" *ngIf="cargando">Cargando tu perfil…</p>
+  <p role="alert" *ngIf="error">{{ error }}</p>
+  <p role="status" *ngIf="mensaje">{{ mensaje }}</p>
+
+  <form (ngSubmit)="guardar()" *ngIf="!cargando">
+    <h2>Mis datos</h2>
+    <p><label>Nombre *<br><input name="nombre" [(ngModel)]="datos.nombre" maxlength="100" required></label></p>
+    <p><label>Teléfono<br><input name="telefono" [(ngModel)]="datos.telefono" maxlength="20"></label></p>
+    <p><label>Correo de contacto<br><input name="correo" [(ngModel)]="datos.correoContacto" maxlength="150"></label></p>
+    <p><label>Dirección<br><input name="direccion" [(ngModel)]="datos.direccion" maxlength="200"></label></p>
+    <button class="btn" type="submit" [disabled]="guardando || !datos.nombre">Guardar perfil</button>
+  </form>
+
+  <h2>Mis servicios</h2>
+  <p class="muted" *ngIf="!servicios.length">Todavía no ofreces ningún servicio.</p>
+  <div>
+    <span class="chip" *ngFor="let servicio of servicios">{{ servicio.nombre }}
+      <button type="button" class="text-link" (click)="quitarServicio(servicio)" [attr.aria-label]="'Quitar ' + servicio.nombre">×</button>
+    </span>
+  </div>
+  <form (ngSubmit)="agregarServicio()">
+    <select name="categoria" [(ngModel)]="categoriaElegida" aria-label="Servicio que quieres agregar">
+      <option value="">Elige un servicio…</option>
+      <option *ngFor="let categoria of disponibles" [value]="categoria.id">{{ categoria.nombre }}</option>
+    </select>
+    <button class="btn btn-outline" type="submit" [disabled]="!categoriaElegida">Agregar servicio</button>
+  </form>
+</section>

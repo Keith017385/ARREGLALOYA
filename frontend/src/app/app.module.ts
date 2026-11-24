@@ -16,9 +16,10 @@ import { FinalizacionServicioModule } from './finalizacion-servicio/finalizacion
 import { ModificacionPrecioComponent } from './modificacion-precio/modificacion-precio.component';
 import { ModificacionPrecioConectadaComponent } from './modificacion-precio/modificacion-precio-conectada.component';
 import { PerfilTrabajadorComponent } from './trabajadores/perfil-trabajador.component';
+import { DocumentosTrabajadorComponent } from './trabajadores/documentos-trabajador.component';
 
 @NgModule({
-  declarations: [AppComponent, ModificacionPrecioComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent],
+  declarations: [AppComponent, ModificacionPrecioComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent],
   imports: [
     BrowserModule,
     FormsModule,

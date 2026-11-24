@@ -44,6 +44,10 @@ import { PostgresPerfilTrabajadorRepository } from './INFRASTRUCTURE/postgres-pe
 import { CategoriasService } from './SERVICE/categorias.service';
 import { ModificacionPrecioService } from './SERVICE/modificacion-precio.service';
 import { PerfilTrabajadorService } from './SERVICE/perfil-trabajador.service';
+import { DocumentoVerificacionController } from './API/documento-verificacion.controller';
+import { DocumentoVerificacionRepository } from './CORE/documento-verificacion';
+import { PostgresDocumentoVerificacionRepository } from './INFRASTRUCTURE/postgres-documento-verificacion.repository';
+import { DocumentoVerificacionService } from './SERVICE/documento-verificacion.service';
 
 @Module({
   imports: [DatabaseModule, FinalizacionModule, PagoFinalModule],
@@ -64,10 +68,12 @@ import { PerfilTrabajadorService } from './SERVICE/perfil-trabajador.service';
     RespuestaOpinionController,
     CandidatosAsistenciaController,
     PerfilTrabajadorController,
+    DocumentoVerificacionController,
   ],
   providers: [
     CategoriasService,
     PerfilTrabajadorService,
+    DocumentoVerificacionService,
     {
       provide: CalificacionOpinionService,
       useFactory: (db: DbService) => new CalificacionOpinionService(new PostgresCalificacionOpinionRepository(db.pool)),
@@ -120,6 +126,10 @@ import { PerfilTrabajadorService } from './SERVICE/perfil-trabajador.service';
     {
       provide: PerfilTrabajadorRepository,
       useClass: PostgresPerfilTrabajadorRepository,
+    },
+        {
+      provide: DocumentoVerificacionRepository,
+      useClass: PostgresDocumentoVerificacionRepository,
     },
     {
       provide: PostgresModificacionPrecioRepository,

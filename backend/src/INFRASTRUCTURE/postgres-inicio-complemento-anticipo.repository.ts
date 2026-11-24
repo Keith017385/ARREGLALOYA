@@ -1,12 +1,7 @@
 import type { Pool } from 'pg';
+import type { SolicitudComplementoAnticipo, InicioComplementoAnticipoRepository } from '../CORE/complemento-anticipo.repository';
 
-export interface SolicitudComplementoAnticipo {
-  solicitudId: string;
-  importeSolicitado: string;
-  reutilizada: boolean;
-}
-
-export class PostgresInicioComplementoAnticipoRepository {
+export class PostgresInicioComplementoAnticipoRepository implements InicioComplementoAnticipoRepository {
   constructor(private readonly pool: Pool) {}
 
   async iniciar(

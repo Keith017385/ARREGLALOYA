@@ -35,6 +35,8 @@ import { PostgresModificacionPrecioRepository } from './INFRASTRUCTURE/postgres-
 import { ModificacionPrecioService } from './SERVICE/modificacion-precio.service';
 import { PostgresComplementoAnticipoRepository } from './INFRASTRUCTURE/postgres-complemento-anticipo.repository';
 import { PostgresInicioComplementoAnticipoRepository } from './INFRASTRUCTURE/postgres-inicio-complemento-anticipo.repository';
+import { ComplementoAnticipoService } from './SERVICE/complemento-anticipo.service';
+import { CandidatosAsistenciaService } from './SERVICE/casos-escalados/candidatos-asistencia.service';
 
 /**
  * Evita repetir provide/useFactory/inject para cada repositorio.
@@ -91,6 +93,14 @@ export const casosDeUsoProviders: Provider[] = [
     (pool) => new PostgresCandidatosAsistenciaRepository(pool),
   ),
 
+  // CU-20: el controller utiliza SERVICE, nunca directamente PostgreSQL.
+  {
+    provide: CandidatosAsistenciaService,
+    useFactory: (repo: PostgresCandidatosAsistenciaRepository) =>
+      new CandidatosAsistenciaService(repo),
+    inject: [PostgresCandidatosAsistenciaRepository],
+  },
+
   // CU-06: servicio depende de un repositorio inyectado, no abre conexiones.
   desdePostgres(
     PostgresModificacionPrecioRepository,
@@ -111,4 +121,12 @@ export const casosDeUsoProviders: Provider[] = [
     PostgresInicioComplementoAnticipoRepository,
     (pool) => new PostgresInicioComplementoAnticipoRepository(pool),
   ),
+  {
+    provide: ComplementoAnticipoService,
+    useFactory: (
+      consulta: PostgresComplementoAnticipoRepository,
+      inicio: PostgresInicioComplementoAnticipoRepository,
+    ) => new ComplementoAnticipoService(consulta, inicio),
+    inject: [PostgresComplementoAnticipoRepository, PostgresInicioComplementoAnticipoRepository],
+  },
 ];

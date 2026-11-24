@@ -10,8 +10,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PostgresComplementoAnticipoRepository } from '../INFRASTRUCTURE/postgres-complemento-anticipo.repository';
-import { PostgresInicioComplementoAnticipoRepository } from '../INFRASTRUCTURE/postgres-inicio-complemento-anticipo.repository';
+import { ComplementoAnticipoService } from '../SERVICE/complemento-anticipo.service';
 
 interface SolicitudConUsuario {
   user?: { usuarioId?: unknown };
@@ -41,10 +40,7 @@ function validarReservaId(reservaId: string): void {
 
 @Controller('reservas/:reservaId/complemento-anticipo')
 export class ComplementoAnticipoController {
-  constructor(
-    private readonly consulta: PostgresComplementoAnticipoRepository,
-    private readonly inicio: PostgresInicioComplementoAnticipoRepository,
-  ) {}
+  constructor(private readonly servicio: ComplementoAnticipoService) {}
 
   @Get()
   async consultar(
@@ -54,7 +50,7 @@ export class ComplementoAnticipoController {
     const clienteId = leerCliente(solicitud);
     validarReservaId(reservaId);
 
-    const resultado = await this.consulta.consultar(reservaId, clienteId);
+    const resultado = await this.servicio.consultar(reservaId, clienteId);
     if (!resultado) {
       throw new NotFoundException('El complemento no está disponible para esta reserva.');
     }
@@ -71,7 +67,7 @@ export class ComplementoAnticipoController {
     validarReservaId(reservaId);
 
     try {
-      return await this.inicio.iniciar(reservaId, clienteId);
+      return await this.servicio.iniciar(reservaId, clienteId);
     } catch (error: unknown) {
       if (error instanceof Error) {
         switch (error.message) {

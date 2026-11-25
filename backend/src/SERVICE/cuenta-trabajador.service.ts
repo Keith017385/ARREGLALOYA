@@ -34,5 +34,8 @@ export class CuentaTrabajadorService {
   private revisar(resultado: ResultadoCambioCuenta, mensajeConflicto: string): void {
     if (resultado === 'no_encontrado') throw new NotFoundException('Trabajador no encontrado.');
     if (resultado === 'estado_no_permitido') throw new ConflictException(mensajeConflicto);
+    if (resultado === 'con_reservas_vigentes') {
+      throw new ConflictException('No puedes suspender tu cuenta mientras tengas reservas vigentes.');
+    }
   }
 }

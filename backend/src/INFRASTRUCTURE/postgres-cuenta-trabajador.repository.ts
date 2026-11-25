@@ -33,7 +33,7 @@ export class PostgresCuentaTrabajadorRepository extends CuentaTrabajadorReposito
     }
   }
 
-  suspender(usuarioId: string): Promise<ResultadoCambioCuenta> {
+   suspender(usuarioId: string): Promise<ResultadoCambioCuenta> {
     return this.cambiarEstado(
       usuarioId,
       'activo',
@@ -48,6 +48,20 @@ export class PostgresCuentaTrabajadorRepository extends CuentaTrabajadorReposito
         );
       },
       'No se pudo suspender la cuenta.',
+      async cliente => {
+        const r = await cliente.query(
+          `SELECT 1
+           FROM arreglalo.reserva r
+           JOIN arreglalo.cotizacion c ON c.cotizacion_id = r.cotizacion_id
+           JOIN arreglalo.visita v ON v.visita_id = c.visita_id
+           JOIN arreglalo.oferta o ON o.oferta_id = v.oferta_id
+           WHERE o.trabajador_id = $1::bigint
+             AND r.estado IN ('pendiente_anticipo', 'reservada', 'en_ejecucion')
+           LIMIT 1`,
+          [usuarioId],
+        );
+        return (r.rowCount ?? 0) > 0;
+      },
     );
   }
 
@@ -76,6 +90,7 @@ export class PostgresCuentaTrabajadorRepository extends CuentaTrabajadorReposito
     estadoRequerido: EstadoCuenta,
     pasos: (cliente: PoolClient) => Promise<void>,
     mensajeError: string,
+    bloqueo?: (cliente: PoolClient) => Promise<boolean>,
   ): Promise<ResultadoCambioCuenta> {
     let cliente: PoolClient | undefined;
     try {
@@ -96,6 +111,10 @@ export class PostgresCuentaTrabajadorRepository extends CuentaTrabajadorReposito
       if (actual.rows[0].estado !== estadoRequerido) {
         await cliente.query('ROLLBACK');
         return 'estado_no_permitido';
+      }
+            if (bloqueo && (await bloqueo(cliente))) {
+        await cliente.query('ROLLBACK');
+        return 'con_reservas_vigentes';
       }
       await pasos(cliente);
       await cliente.query('COMMIT');

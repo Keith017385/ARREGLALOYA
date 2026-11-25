@@ -6,8 +6,7 @@ export interface CuentaTrabajador {
   suspendidaDesde: Date | null;
 }
 
-export type ResultadoCambioCuenta = 'ok' | 'no_encontrado' | 'estado_no_permitido';
-
+export type ResultadoCambioCuenta = 'ok' | 'no_encontrado' | 'estado_no_permitido' | 'con_reservas_vigentes';
 // Contrato que permite probar el caso de uso sin conectarse a PostgreSQL.
 export abstract class CuentaTrabajadorRepository {
   abstract obtener(usuarioId: string): Promise<CuentaTrabajador | null>;

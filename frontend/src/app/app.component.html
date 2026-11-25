@@ -56,6 +56,7 @@
       <button (click)="navegar('como')" [class.active]="vista === 'como'">¿Cómo funciona?</button>
       <button (click)="navegar('nosotros')" [class.active]="vista === 'nosotros'">Nosotros</button>
       <button (click)="navegar('mi-perfil')" [class.active]="vista === 'mi-perfil'">Mi perfil</button>
+            <button (click)="navegar('mi-cuenta')" [class.active]="vista === 'mi-cuenta'">Mi cuenta</button>
     </nav>
     <div class="account-actions">
       <button class="btn btn-outline small" (click)="modal='sesion'">Iniciar sesión</button>
@@ -332,6 +333,7 @@
     <button class="btn" (click)="navegar('servicios')">Conocer los servicios →</button>
   </section>
   <app-perfil-trabajador *ngIf="vista === 'mi-perfil'"></app-perfil-trabajador>
+    <app-cuenta-trabajador *ngIf="vista === 'mi-cuenta'"></app-cuenta-trabajador>
 </main>
 <footer>
   <a class="brand" href="#" (click)="$event.preventDefault(); navegar('inicio')">Arréglalo Ya<span class="brand-dot">.</span>

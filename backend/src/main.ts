@@ -5,8 +5,16 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import session from 'express-session';
+import type { Request, Response, NextFunction } from 'express';
 import connectPgSimple from 'connect-pg-simple';
+import { UsuariosRepository } from './CORE/usuarios/usuarios.repository';
 import { DbService } from './INFRASTRUCTURE/db.service';
+
+declare module 'express-session' {
+  interface SessionData {
+    usuarioId?: string;
+  }
+}
 
 const PgSession = connectPgSimple(session);
 
@@ -42,6 +50,22 @@ async function iniciar(): Promise<void> {
       },
     }),
   );
+
+  const usuarios = app.get(UsuariosRepository);
+  app.use(async (req: Request & { user?: { usuarioId: string } }, _res: Response, next: NextFunction) => {
+    try {
+      if (req.session.usuarioId) {
+        const usuario = await usuarios.buscarUsuario(req.session.usuarioId);
+        if (usuario && ['activo', 'suspendido_voluntario'].includes(usuario.estado)) {
+          const soloPerfil = req.method === 'GET' && req.path === '/api/usuarios/perfil';
+          if (usuario.estado === 'activo' || soloPerfil) req.user = { usuarioId: usuario.usuarioId };
+        }
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
 
   app.enableShutdownHooks();
   app.setGlobalPrefix('api');

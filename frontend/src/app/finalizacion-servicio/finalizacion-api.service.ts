@@ -20,6 +20,10 @@ export interface FinalizacionConfirmada {
 export class FinalizacionApiService {
   constructor(private readonly http: HttpClient) {}
 
+  iniciar(reservaId: string): Observable<{ estado: string }> {
+    return this.http.post<{ estado: string }>(this.ruta(reservaId) + '/inicio', {});
+  }
+
   emitir(reservaId: string): Observable<CodigoEmitido> {
     return this.http.post<CodigoEmitido>(
       `${this.ruta(reservaId)}/codigos`,

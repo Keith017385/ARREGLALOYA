@@ -1,0 +1,30 @@
+<section class="page-shell">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">MI CUENTA DE TRABAJADOR</span>
+      <h1>Suspender o reactivar mi cuenta</h1>
+      <p class="muted">Puedes ausentarte sin perder tu perfil.</p>
+    </div>
+  </div>
+  <p role="status" *ngIf="cargando">Cargando tu cuenta…</p>
+  <p role="alert" *ngIf="error">{{ error }}</p>
+  <p role="status" *ngIf="mensaje">{{ mensaje }}</p>
+
+  <div *ngIf="cuenta">
+    <h2>Estado de mi cuenta</h2>
+    <p><span class="chip">{{ etiquetaEstado }}</span></p>
+    <p class="muted" *ngIf="cuenta.suspendidaDesde">Suspendida desde: {{ cuenta.suspendidaDesde | date:'dd/MM/yyyy' }}</p>
+
+    <div *ngIf="cuenta.estado === 'activo'">
+      <p class="muted">Solo puedes suspender tu cuenta si no tienes reservas vigentes.</p>
+      <button class="btn" type="button" (click)="suspender()" [disabled]="trabajando">Suspender mi cuenta</button>
+    </div>
+
+    <div *ngIf="cuenta.estado === 'suspendido_voluntario'">
+      <p class="muted">Puedes reactivarla en cualquier momento. Si pasan 30 días sin reactivarla, el sistema revisará tus trabajos y obligaciones antes de eliminar el acceso.</p>
+      <button class="btn" type="button" (click)="reactivar()" [disabled]="trabajando">Reactivar mi cuenta</button>
+    </div>
+
+    <p *ngIf="cuenta.estado === 'suspendido_sancion'">Tu cuenta está suspendida por una sanción. Esta suspensión no se puede revertir desde aquí.</p>
+  </div>
+</section>

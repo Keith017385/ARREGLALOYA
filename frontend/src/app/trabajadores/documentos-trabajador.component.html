@@ -1,0 +1,27 @@
+<section>
+  <h2>Mis documentos de verificación</h2>
+  <p class="muted">Presenta tu carnet o tus certificados para que revisen tu cuenta. Escribe el nombre del archivo o pega un enlace (por ejemplo, de Google Drive).</p>
+  <p role="status" *ngIf="cargando">Cargando tus documentos…</p>
+  <p role="alert" *ngIf="error">{{ error }}</p>
+  <p role="status" *ngIf="mensaje">{{ mensaje }}</p>
+  <p class="muted" *ngIf="!cargando && !error && !documentos.length">Todavía no presentaste ningún documento.</p>
+  <article *ngFor="let documento of documentos">
+    <strong>{{ etiquetaTipo(documento.tipo) }}</strong>
+    <span class="chip">{{ etiquetaEstado(documento.estado) }}</span>
+    <p class="muted">{{ documento.referenciaArchivo }} · Presentado el {{ documento.presentadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+    <p *ngIf="documento.motivo">Motivo de la revisión: {{ documento.motivo }}</p>
+  </article>
+
+  <form (ngSubmit)="presentar()">
+    <p><label>Tipo de documento<br>
+      <select name="tipoDocumento" [(ngModel)]="nuevo.tipo" required>
+        <option value="">Elige un tipo…</option>
+        <option *ngFor="let tipo of tipos" [value]="tipo.valor">{{ tipo.etiqueta }}</option>
+      </select>
+    </label></p>
+    <p><label>Nombre o enlace del archivo<br>
+      <input name="referenciaArchivo" [(ngModel)]="nuevo.referenciaArchivo" maxlength="300" required>
+    </label></p>
+    <button class="btn" type="submit" [disabled]="guardando || !nuevo.tipo || !nuevo.referenciaArchivo">Presentar documento</button>
+  </form>
+</section>

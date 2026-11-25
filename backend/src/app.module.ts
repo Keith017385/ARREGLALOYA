@@ -1,6 +1,7 @@
 /**
  * Raiz de NestJS: coordina modulos y controllers, no implementa reglas de negocio.
  */
+
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from './INFRASTRUCTURE/database.module';
 import { FinalizacionModule } from './API/finalizacion-servicio/finalizacion.module';
@@ -19,6 +20,21 @@ import { IncidentesSancionesController } from './API/incidentes-sanciones/incide
 import { CandidatosAsistenciaController } from './API/casos-escalados/candidatos-asistencia.controller';
 import { GestionRevisionAsistenciaController } from './API/casos-escalados/gestion-revision-asistencia.controller';
 import { RespuestaOpinionController } from './API/respuesta-opinion/respuesta-opinion.controller';
+import { UsuariosController } from './API/usuarios.controller';
+
+import { PropietarioTrabajadorGuard } from './API/propietario-trabajador.guard';
+import { PerfilTrabajadorController } from './API/perfil-trabajador.controller';
+import { DocumentoVerificacionController } from './API/documento-verificacion.controller';
+import { SolicitudDisponibleController } from './API/solicitud-disponible.controller';
+import { CuentaTrabajadorController } from './API/cuenta-trabajador.controller';
+import { CancelacionTrabajadorController } from './API/cancelacion-trabajador/cancelacion-trabajador.controller';
+import { DocumentacionTrabajadorController } from './API/documentacion-trabajador/documentacion-trabajador.controller';
+import { GestionReclamosController } from './API/gestion-reclamos/gestion-reclamos.controller';
+import { AprobacionDesembolsosController } from './API/aprobacion-desembolsos/aprobacion-desembolsos.controller';
+
+import { SolicitudesController } from './API/solicitudes.controller';
+
+import { SolicitudDesembolsoController } from './API/solicitud-desembolso.controller';
 
 @Module({
   // DbService se registra una sola vez en DatabaseModule.
@@ -38,7 +54,18 @@ import { RespuestaOpinionController } from './API/respuesta-opinion/respuesta-op
     CandidatosAsistenciaController,
     GestionRevisionAsistenciaController,
     RespuestaOpinionController,
+    UsuariosController,
+    SolicitudesController,
+    SolicitudDesembolsoController,
+    PerfilTrabajadorController,
+    DocumentoVerificacionController,
+    SolicitudDisponibleController,
+    CuentaTrabajadorController,
+    CancelacionTrabajadorController,
+    DocumentacionTrabajadorController,
+    GestionReclamosController,
+    AprobacionDesembolsosController,
   ],
-  providers: casosDeUsoProviders,
+  providers: [...casosDeUsoProviders, PropietarioTrabajadorGuard],
 })
 export class AppModule {}

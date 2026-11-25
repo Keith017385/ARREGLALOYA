@@ -6,9 +6,12 @@ import { EmisionCodigoService } from '../../SERVICE/finalizacion-servicio/emisio
 import { FinalizacionService } from '../../SERVICE/finalizacion-servicio/finalizacion.service';
 import { FinalizacionController } from './finalizacion.controller';
 
+import { PostgresInicioServicioRepository } from '../../INFRASTRUCTURE/finalizacion-servicio/postgres-inicio-servicio.repository';
+
 @Module({
   controllers: [FinalizacionController],
   providers: [
+    PostgresInicioServicioRepository,
     {
       provide: EmisionCodigoService,
       useFactory: (db: DbService) =>

@@ -1,0 +1,105 @@
+<h2>Publicar solicitud</h2>
+<form #formulario="ngForm" (ngSubmit)="publicar()">
+  <label>Descripción del trabajo
+    <textarea name="descripcion" [(ngModel)]="descripcion" maxlength="2000" required></textarea>
+  </label>
+  <label>Ubicación
+    <input name="ubicacion" [(ngModel)]="ubicacion" maxlength="500" required>
+  </label>
+  <label>Zona
+    <select name="zona" [(ngModel)]="zonaId" required>
+      <option value="">Seleccionar</option>
+      <option *ngFor="let zona of zonas" [value]="zona.id">{{ zona.nombre }}</option>
+    </select>
+  </label>
+  <label><input type="checkbox" name="urgente" [(ngModel)]="urgente"> Es urgente</label>
+  <fieldset *ngFor="let servicio of servicios; index as i">
+    <legend>Servicio {{ i + 1 }}</legend>
+    <label>Categoría
+      <select [name]="'categoria' + i" [(ngModel)]="servicio.categoriaId" required>
+        <option value="">Seleccionar</option>
+        <option *ngFor="let categoria of categorias" [value]="categoria.id">{{ categoria.nombre }}</option>
+      </select>
+    </label>
+    <label>Detalle del servicio
+      <textarea [name]="'servicio' + i" [(ngModel)]="servicio.descripcion" maxlength="2000" required></textarea>
+    </label>
+    <button type="button" *ngIf="i === 1" (click)="servicios.pop()">Quitar servicio</button>
+  </fieldset>
+  <button type="button" *ngIf="servicios.length < 2" (click)="agregarServicio()">Añadir otro servicio</button>
+  <button class="btn" type="submit" [disabled]="formulario.invalid || enviando">Publicar</button>
+</form>
+<p *ngIf="confirmacion" role="status">{{ confirmacion }}</p>
+<p *ngIf="error" role="alert">{{ error }}</p>
+<h2>Mis solicitudes</h2>
+<p *ngIf="!solicitudes.length && !error">Todavía no tienes solicitudes.</p>
+<article *ngFor="let solicitud of solicitudes">
+  <h3>#{{ solicitud.id }} · {{ solicitud.estado }}</h3>
+  <p>{{ solicitud.descripcion }}</p>
+  <p>{{ solicitud.ubicacion }} · {{ solicitud.creadaEn | date:'short' }}</p>
+  <ul><li *ngFor="let servicio of solicitud.servicios">{{ servicio.descripcion }}</li></ul>
+  <button class="btn btn-outline" type="button" (click)="consultarHistorial(solicitud.id)">Ver historial</button>
+  <button class="btn btn-outline" *ngIf="solicitud.estado === 'publicada'" type="button"
+          (click)="editarSolicitud(solicitud)" [disabled]="guardandoEdicion">Editar descripción y ubicación</button>
+  <form *ngIf="solicitudEditada === solicitud.id" #edicion="ngForm" (ngSubmit)="guardarSolicitud(solicitud.id)">
+    <label>Descripción<textarea name="descripcionEdicion" [(ngModel)]="datosEdicion.descripcion" required maxlength="2000"></textarea></label>
+    <label>Ubicación<input name="ubicacionEdicion" [(ngModel)]="datosEdicion.ubicacion" required maxlength="500"></label>
+    <button class="btn" type="submit" [disabled]="edicion.invalid || guardandoEdicion">Guardar cambios</button>
+    <button type="button" (click)="solicitudEditada = ''" [disabled]="guardandoEdicion">Cerrar</button>
+  </form>
+  <p *ngIf="errorHistorial && (solicitudEditada === solicitud.id || historialId === solicitud.id)" role="alert">{{ errorHistorial }}</p>
+  <ol *ngIf="historialId === solicitud.id">
+    <li *ngFor="let evento of historial">{{ evento.registradaEn | date:'short' }} · {{ evento.estado }}
+      <span *ngIf="evento.campos.length"> · Cambios en {{ evento.campos.join(', ') }}</span>
+    </li>
+  </ol>
+  <button *ngIf="solicitud.estado === 'publicada'" class="btn btn-outline" type="button"
+          (click)="consultarTrabajadores(solicitud.id)" [disabled]="guardandoSeleccion">Buscar trabajadores</button>
+  <section *ngIf="solicitudParaTrabajadores === solicitud.id">
+    <p *ngIf="cargandoTrabajadores" role="status">Buscando trabajadores…</p>
+    <p *ngIf="errorSeleccion" role="alert">{{ errorSeleccion }}</p>
+    <p *ngIf="!trabajadores.length && !cargandoTrabajadores && !errorSeleccion">No hay trabajadores verificados para la zona y las categorías de esta solicitud.</p>
+    <article *ngFor="let trabajador of trabajadores">
+      <h4>{{ trabajador.nombre }}</h4>
+      <p>{{ trabajador.zona }} · {{ trabajador.opiniones }} opiniones<span *ngIf="trabajador.puntuacion"> · {{ trabajador.puntuacion }}/5</span></p>
+      <p *ngIf="trabajador.seleccionado">Trabajador seleccionado.</p>
+      <button *ngIf="!trabajador.seleccionado" class="btn" type="button" [disabled]="guardandoSeleccion"
+              (click)="seleccionarTrabajador(solicitud.id, trabajador.id)">Seleccionar trabajador</button>
+    </article>
+  </section>
+  <button class="btn btn-outline" type="button" (click)="consultarOfertas(solicitud.id)" [disabled]="decidiendo">Consultar ofertas</button>
+  <section *ngIf="solicitudElegida === solicitud.id">
+    <p *ngIf="cargandoOfertas" role="status">Cargando ofertas…</p>
+    <p *ngIf="errorOfertas" role="alert">{{ errorOfertas }}</p>
+    <p *ngIf="!cargandoOfertas && !errorOfertas && !ofertas.length">Todavía no hay ofertas.</p>
+    <article *ngFor="let oferta of ofertas">
+      <h4>{{ oferta.trabajador }}</h4>
+      <p *ngIf="!oferta.cotizacionId">Oferta {{ oferta.estadoOferta }}. La cotización está pendiente.</p>
+      <div *ngIf="oferta.cotizacionId">
+        <p>{{ oferta.precio }} BOB · Vigente hasta {{ oferta.venceEn | date:'short' }}</p>
+        <p *ngIf="oferta.decision">Cotización {{ oferta.decision }}.</p>
+        <button *ngIf="oferta.decision === 'aceptada'" class="btn btn-outline" type="button"
+                (click)="consultarReserva(oferta.cotizacionId)" [disabled]="guardandoReserva">Ver reserva y anticipo</button>
+        <section *ngIf="cotizacionReserva === oferta.cotizacionId">
+          <p *ngIf="errorReserva" role="alert">{{ errorReserva }}</p>
+          <ng-container *ngIf="reservaInicial">
+            <p>Precio {{ reservaInicial.precio }} BOB · Anticipo {{ reservaInicial.anticipo }} BOB · Comisión {{ reservaInicial.comision }} BOB</p>
+            <p *ngIf="reservaInicial.reservaId">Reserva #{{ reservaInicial.reservaId }} · {{ reservaInicial.estado }}</p>
+            <p *ngIf="reservaInicial.estado === 'pendiente_anticipo'">La confirmación depende de la acreditación del anticipo.</p>
+            <form *ngIf="!reservaInicial.reservaId" (ngSubmit)="crearReserva(inicioReserva)">
+              <label>Inicio programado
+                <input type="datetime-local" name="inicio" [(ngModel)]="inicioReserva" required>
+              </label>
+              <button type="submit" class="btn" [disabled]="guardandoReserva || !inicioReserva">Registrar reserva pendiente</button>
+            </form>
+          </ng-container>
+        </section>
+        <p *ngIf="!oferta.decision && !oferta.disponible">Cotización no disponible.</p>
+        <div *ngIf="oferta.disponible">
+          <button class="btn" type="button" [disabled]="decidiendo" (click)="decidirOferta(solicitud.id, oferta.cotizacionId, 'aceptada')">Aceptar cotización</button>
+          <button class="btn btn-outline" type="button" [disabled]="decidiendo" (click)="decidirOferta(solicitud.id, oferta.cotizacionId, 'rechazada')">Rechazar cotización</button>
+        </div>
+      </div>
+    </article>
+  </section>
+</article>

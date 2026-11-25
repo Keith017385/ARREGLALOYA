@@ -1,0 +1,261 @@
+
+.solicitudes-container {
+  padding: 30px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.panel-title {
+  margin: 0 0 8px;
+  font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+  font-weight: 750;
+  line-height: 1.25;
+  letter-spacing: -.025em;
+  color: var(--ink);
+}
+
+.encabezado p {
+  color: var(--muted);
+  margin: 0;
+}
+
+
+
+.mensaje {
+  padding: 25px;
+  text-align: center;
+  background: var(--surface-tint);
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+.error {
+  background: var(--error-surface);
+  color: var(--error-ink);
+}
+
+.vacio h3 {
+  color: var(--ink);
+}
+
+.lista-solicitudes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 22px;
+}
+
+.solicitud-card {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background:var(--surface);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.estado {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.urgente {
+  background: var(--warning-surface);
+  color: var(--warning-ink);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.solicitud-card h2 {
+  font-size: 20px;
+  color: var(--ink);
+}
+
+.descripcion {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.datos {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  margin: 15px 0;
+}
+
+.datos p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.servicios h3 {
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.servicio-item {
+  background: var(--surface-tint);
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.servicio-item p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (max-width: 600px) {
+  .solicitudes-container {
+    padding: 16px;
+  }
+
+  .encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+:host { display:block; font-size: .9375rem; line-height: 1.55; }
+.encabezado { flex-wrap: wrap; align-items: flex-start; }
+.encabezado > div { flex: 1 1 190px; }
+.mensaje p { margin: 0 0 12px; }
+.worker-columns > .solicitudes-container { padding: clamp(16px, 3vw, 24px); width: 100%; }
+
+/* Panel del trabajador; la barra de navegación global queda intacta. */
+.editorial-columns.worker-columns {
+  width: 100%;
+  max-width: 1260px;
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 1.22fr) minmax(300px, .78fr);
+  align-items: start;
+  gap: 22px;
+}
+
+.worker-columns .solicitudes-container {
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: clamp(20px, 2.5vw, 30px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--elevation-1);
+}
+
+.worker-columns .encabezado {
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.worker-eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--primary);
+  font-size: .67rem;
+  font-weight: 750;
+  letter-spacing: .105em;
+}
+
+.worker-columns .panel-title {
+  margin: 0 0 7px;
+  color: var(--ink);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  line-height: 1.2;
+  letter-spacing: -.035em;
+}
+
+.worker-columns .encabezado p { color: var(--muted); }
+.worker-columns .btn { min-height: 42px; border-radius: 11px; }
+
+.worker-columns .mensaje {
+  margin: 14px 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-tint);
+  line-height: 1.5;
+}
+
+.worker-columns .mensaje.error {
+  border-color: #e7cbd4;
+  background: var(--error-surface);
+}
+
+.worker-columns .lista-solicitudes {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 15px;
+}
+
+.worker-columns .solicitud-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 19px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
+  box-shadow: var(--elevation-1);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.worker-columns .solicitud-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-2);
+}
+
+.worker-columns .solicitud-card h2 { margin: 2px 0 10px; font-size: 1.13rem; line-height: 1.3; }
+.worker-columns .card-header { align-items: center; gap: 8px; margin-bottom: 13px; }
+.worker-columns .estado, .worker-columns .urgente { padding: 5px 10px; font-weight: 650; }
+.worker-columns .descripcion { color: var(--muted); }
+.worker-columns .datos { margin: 12px 0; padding: 10px 0; }
+.worker-columns .datos p { margin: 5px 0; line-height: 1.45; }
+.worker-columns .servicios { margin-bottom: 15px; }
+.worker-columns .servicios h3 { margin-bottom: 9px; font-size: .95rem; }
+.worker-columns .servicio-item { background: var(--surface-tint); }
+.worker-columns .solicitud-card > .btn { width: 100%; margin-top: auto; }
+
+.worker-section-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+.worker-section-heading .panel-title { margin-bottom:0; }
+.offer-count { display:grid; min-width:34px; height:34px; place-items:center; padding:0 9px; border-radius:11px; background:var(--secondary-container); color:var(--primary); font-size:.82rem; font-weight:750; }
+.worker-empty { display:grid; justify-items:start; gap:9px; padding:21px 18px; border:1px dashed var(--line); border-radius:14px; background:var(--surface-tint); }
+.worker-empty > span { display:grid; width:35px; height:35px; place-items:center; border-radius:11px; background:var(--secondary-container); color:var(--primary); font-size:1.25rem; }
+.worker-empty strong { color:var(--ink); font-size:.96rem; }
+.worker-empty p { margin:0; color:var(--muted); font-size:.86rem; line-height:1.5; }
+.worker-offer-card { margin-top:13px; padding:17px; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:var(--elevation-1); }
+.worker-offer-card h3 { margin:0 0 9px; color:var(--ink); font-size:.98rem; }
+.worker-offer-card p { margin:7px 0; color:var(--muted); font-size:.87rem; }
+.worker-offer-card .reservation-actions { gap:8px; }
+.worker-offer-card .reservation-actions .btn { flex:1 1 145px; }
+.worker-offer-card form { display:grid; gap:12px; margin-top:14px; padding-top:14px; border-top:1px solid var(--line); }
+
+@media (max-width: 940px) {
+  .editorial-columns.worker-columns { grid-template-columns:minmax(0, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .worker-columns .solicitudes-container { padding:18px; }
+  .worker-columns .encabezado { align-items:stretch; }
+  .worker-columns .encabezado > .btn { align-self:flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .worker-columns .solicitud-card { transition:none; }
+  .worker-columns .solicitud-card:hover { transform:none; }
+}

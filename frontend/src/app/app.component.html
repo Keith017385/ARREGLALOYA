@@ -50,20 +50,29 @@
         </svg>
       </span>Arréglalo Ya<span class="brand-dot">.</span>
     </a>
-    <nav aria-label="Navegación principal">
-      <button [class.active]="vista === 'inicio'" (click)="navegar('inicio')">Inicio</button>
-      <button [class.active]="vista === 'servicios' || vista === 'trabajadores'" (click)="q=''; navegar('servicios'); cargar()">Servicios</button>
-      <button (click)="navegar('como')" [class.active]="vista === 'como'">¿Cómo funciona?</button>
-      <button (click)="navegar('nosotros')" [class.active]="vista === 'nosotros'">Nosotros</button>
+    <nav aria-label="Navegación principal" *ngIf="!cuenta">
+      <button [class.active]="vista === 'inicio'" [attr.aria-current]="vista === 'inicio' ? 'page' : null" (click)="navegar('inicio')">Inicio</button>
+      <button [class.active]="vista === 'servicios' || vista === 'trabajadores'" [attr.aria-current]="vista === 'servicios' || vista === 'trabajadores' ? 'page' : null" (click)="q=''; navegar('servicios'); cargar()">Servicios</button>
+      <button (click)="navegar('como')" [class.active]="vista === 'como'" [attr.aria-current]="vista === 'como' ? 'page' : null">¿Cómo funciona?</button>
+      <button (click)="navegar('nosotros')" [class.active]="vista === 'nosotros'" [attr.aria-current]="vista === 'nosotros' ? 'page' : null">Nosotros</button>
     </nav>
-    <div class="account-actions">
+    <nav aria-label="Áreas de trabajo" *ngIf="cuenta">
+      <button *ngIf="tieneRol('cliente') && cuenta.estado === 'activo'" (click)="navegar('servicios')">Servicios</button>
+      <button *ngIf="tieneRol('cliente') && cuenta.estado === 'activo'" (click)="solicitar()">Mis solicitudes</button>
+      <button *ngIf="acceso('panel-trabajador')" (click)="navegar('panel-trabajador')">Trabajador</button>
+      <button *ngIf="acceso('panel-administracion')" (click)="navegar('panel-administracion')">Administración</button>
+      <button *ngIf="acceso('panel-superadministracion')" (click)="navegar('panel-superadministracion')">Superadministración</button>
+    </nav>
+    <div class="account-actions" *ngIf="cuenta">
+      <button class="btn btn-outline small" (click)="navegar('mi-cuenta')">{{ cuenta.nombre }}</button>
+      <button class="btn btn-outline small" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+    <div class="account-actions guest-actions" *ngIf="!cuenta">
       <button class="btn btn-outline small" (click)="modal='sesion'">Iniciar sesión</button>
-      <button class="btn small" (click)="modal='registro'">Registrarse</button>
+      <button class="btn small" (click)="abrirRegistro()">Registrarse</button>
     </div>
     <button class="mobile-menu" aria-label="Abrir menú" [attr.aria-expanded]="menuAbierto" (click)="menuAbierto = !menuAbierto">
-      <svg>
-        <use href="#filtros"/>
-      </svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
   </div>
   <div class="mobile-links" *ngIf="menuAbierto">
@@ -71,30 +80,28 @@
     <button (click)="navegar('servicios'); filtrar('')">Servicios</button>
     <button (click)="navegar('como')">¿Cómo funciona?</button>
     <button (click)="navegar('nosotros')">Nosotros</button>
-    <button (click)="navegar('solicitud')">Mi solicitud</button>
-    <button (click)="menuAbierto=false; modal='sesion'">Iniciar sesión</button>
-    <button (click)="menuAbierto=false; modal='registro'">Registrarse</button>
+    <button *ngIf="!cuenta || tieneRol('cliente')" (click)="navegar('solicitud')">Mis solicitudes</button>
+    <button *ngIf="acceso('panel-trabajador')" (click)="navegar('panel-trabajador')">Trabajador</button>
+    <button *ngIf="acceso('panel-administracion')" (click)="navegar('panel-administracion')">Administración</button>
+    <button *ngIf="acceso('panel-superadministracion')" (click)="navegar('panel-superadministracion')">Superadministración</button>
+    <ng-container *ngIf="!cuenta">
+      <button (click)="menuAbierto=false; modal='sesion'">Iniciar sesión</button>
+      <button (click)="menuAbierto=false; abrirRegistro()">Registrarse</button>
+    </ng-container>
+    <button *ngIf="cuenta" (click)="navegar('mi-cuenta')">Mi cuenta</button>
+    <button *ngIf="cuenta" (click)="cerrarSesion()">Cerrar sesión</button>
   </div>
 </header>
 <main>
   <ng-container *ngIf="vista === 'inicio'">
     <section class="hero">
       <div class="hero-copy">
-        <h1>Servicios para tu hogar,<br>
-          <span>rápido y confiable.</span>
-        </h1>
-        <p>Encuentra trabajadores para reparaciones y<br class="desktop"> mantenimiento en Cochabamba.</p>
-        <form class="hero-search" (ngSubmit)="buscar()">
-          <svg>
-            <use href="#buscar"/>
-          </svg>
-          <input aria-label="¿Qué servicio necesitas?" name="inicioBusqueda" [(ngModel)]="q" placeholder="¿Qué servicio necesitas?" maxlength="80">
-          <button class="btn" type="submit">Buscar <span>↗</span>
-          </button>
-        </form>
+        <h1>Reparaciones<br>para tu hogar</h1>
+        <p>Encuentra especialistas para reparaciones y mantenimiento en Cochabamba.</p>
+        <button class="btn" type="button" (click)="navegar('servicios')">Explorar servicios <span aria-hidden="true">→</span></button>
       </div>
       <div class="hero-art">
-        <img src="assets/hogar.png" alt="Casa y herramientas de reparación en tonos violeta">
+        <img src="assets/inicio-tecnico.jpg" alt="Técnico revisando la instalación de un fregadero" width="993" height="442" fetchpriority="high">
       </div>
     </section>
     <section class="benefits" aria-label="Cómo te ayudamos">
@@ -151,8 +158,16 @@
         </button>
       </div>
     </section>
+    <section class="page-shell home-story">
+      <img src="assets/inicio-equipo.jpg" alt="Dos profesionales revisando una reparación en una vivienda" width="1313" height="443" loading="lazy">
+      <div>
+        <h2>Encuentra ayuda para tu hogar</h2>
+        <p>Explora los servicios disponibles en Cochabamba y describe el trabajo que necesitas.</p>
+        <button class="btn" type="button" (click)="navegar('servicios')">Ver servicios</button>
+      </div>
+    </section>
   </ng-container>
-  <section class="page-shell" *ngIf="vista === 'servicios'">
+  <section class="page-shell editorial-page" *ngIf="vista === 'servicios'">
     <div class="section-heading">
       <div>
         <span class="eyebrow">ENCUENTRA LO QUE NECESITAS</span>
@@ -187,7 +202,7 @@
               <use href="#buscar"/>
             </svg>
             <input aria-label="Buscar servicio" name="busquedaCatalogo" [(ngModel)]="q" maxlength="80" placeholder="Buscar un servicio…">
-            <button type="submit" class="text-link">Buscar</button>
+            <button type="submit" class="btn">Buscar</button>
           </form>
           <button class="btn btn-outline filter-btn" [attr.aria-expanded]="filtros" (click)="filtros = !filtros">
             <svg>
@@ -266,42 +281,122 @@
       </aside>
     </div>
   </section>
-  <section class="page-shell" *ngIf="vista === 'solicitud'">
-    <h1>Mi solicitud</h1>
-    <div class="empty-state">
+  <section class="page-shell editorial-page" *ngIf="vista === 'solicitud'">
+    <h1>Mis solicitudes</h1>
+    <app-solicitudes *ngIf="cuenta && !tipoOperacion" [categoriaInicial]="categoriaSeleccionada"></app-solicitudes>
+    <div class="empty-state" *ngIf="!cuenta">
       <h2>Inicia sesión para ver tus solicitudes</h2>
       <button class="btn" (click)="solicitar()">Iniciar sesión</button>
     </div>
-    <div class="empty-state" *ngIf="!tipoOperacion">
-      <p>Las operaciones privadas requieren autenticación real. Mientras no se implemente, la API responderá 401.</p>
-      <label for="id-reserva-prueba">ID de reserva para revisar vistas técnicas</label>
-      <input id="id-reserva-prueba" type="text" name="idReservaPrueba" [(ngModel)]="reservaIdConsulta">
-      <p *ngIf="error" role="alert">{{ error }}</p>
-      <div class="actions">
-        <button type="button" (click)="abrirOperacion('modificacion')">CU-06 Precio</button>
-        <button type="button" (click)="abrirOperacion('finalizacion')">CU-07 Finalización</button>
-        <button type="button" (click)="abrirOperacion('pago')">CU-08 Pago</button>
-        <button type="button" (click)="abrirOperacion('calificacion')">CU-09 Calificación</button>
-        <button type="button" (click)="abrirOperacion('reclamo')">CU-10 Reclamo</button>
-        <button type="button" (click)="abrirOperacion('asistencia')">CU-11 Asistencia</button>
-        <button type="button" (click)="abrirOperacion('cancelacion')">CU-21 Cancelación</button>
+    <details class="demo-panel" *ngIf="!tipoOperacion">
+      <summary>Zona de demostración</summary>
+      <p>Explora ejemplos de una reserva ficticia. Las acciones de esta demo son simuladas.</p>
+      <div class="demo-actions">
+        <button class="btn btn-outline" type="button" *ngFor="let ejemplo of ejemplosDemo"
+                [attr.aria-pressed]="demoActual === ejemplo" (click)="demoActual = ejemplo; demoMensaje = ''">
+          {{ ejemplo.nombre }}
+        </button>
       </div>
-    </div>
-    <button *ngIf="tipoOperacion" type="button" (click)="tipoOperacion=''">Volver a las operaciones</button>
+      <article class="demo-preview" *ngIf="demoActual" aria-label="Vista de ejemplo">
+        <p class="demo-badge">DEMO · Reserva de plomería</p>
+        <h2>{{ demoActual.nombre }}</h2>
+        <p>{{ demoActual.detalle }}</p>
+        <button class="btn" type="button" (click)="demoMensaje = demoActual.resultado">{{ demoActual.accion }}</button>
+        <p *ngIf="demoMensaje" role="status">{{ demoMensaje }}</p>
+      </article>
+    </details>
+    <button *ngIf="tipoOperacion" class="btn btn-outline" type="button" (click)="tipoOperacion=''">Volver a mis solicitudes</button>
     <app-modificacion-precio-conectada *ngIf="tipoOperacion === 'modificacion'" [reservaId]="reservaIdOperacion"></app-modificacion-precio-conectada>
     <app-finalizacion-servicio *ngIf="tipoOperacion === 'finalizacion'" [reservaId]="reservaIdOperacion" [rol]="rolFinalizacion"></app-finalizacion-servicio>
     <app-pago-final-reserva *ngIf="tipoOperacion === 'pago'" [reservaId]="reservaIdOperacion"></app-pago-final-reserva>
     <app-calificacion-opinion *ngIf="tipoOperacion === 'calificacion'" [reservaId]="reservaIdOperacion"></app-calificacion-opinion>
     <app-reclamo-formal *ngIf="tipoOperacion === 'reclamo'" [reservaId]="reservaIdOperacion"></app-reclamo-formal>
     <app-declaracion-asistencia *ngIf="tipoOperacion === 'asistencia'" [reservaId]="reservaIdOperacion"></app-declaracion-asistencia>
+    <app-cancelacion-trabajador *ngIf="tipoOperacion === 'cancelacion-trabajador'" [reservaId]="reservaIdOperacion"></app-cancelacion-trabajador>
     <app-cancelacion-cliente *ngIf="tipoOperacion === 'cancelacion'" [reservaId]="reservaIdOperacion"></app-cancelacion-cliente>
   </section>
   <section class="page-shell" *ngIf="vista === 'avisos-cancelacion'"><app-avisos-cancelacion></app-avisos-cancelacion></section>
-  <section class="page-shell" *ngIf="vista === 'revision-pagos'"><app-revision-discrepancias-pago></app-revision-discrepancias-pago></section>
-  <section class="page-shell" *ngIf="vista === 'incidentes'"><app-incidentes-sanciones></app-incidentes-sanciones></section>
-  <section class="page-shell" *ngIf="vista === 'revisiones-asistencia'"><app-gestion-revision-asistencia></app-gestion-revision-asistencia></section>
-  <section class="page-shell" *ngIf="vista === 'candidatos-asistencia'"><app-candidatos-asistencia></app-candidatos-asistencia></section>
   <section class="page-shell" *ngIf="vista === 'opinion-servicio'"><app-respuesta-opinion [calificacionId]="calificacionIdParaOpinion"></app-respuesta-opinion></section>
+  <section class="page-shell" *ngIf="vista === 'mi-cuenta' && cuenta">
+    <h1>Mi cuenta</h1>
+    <p>{{ cuenta.nombre }}</p>
+    <p *ngIf="cuenta.correoContacto">{{ cuenta.correoContacto }}</p>
+    <p *ngIf="cuenta.telefono">{{ cuenta.telefono }}</p>
+    <p *ngIf="cuenta.estado === 'suspendido_voluntario'">Tu cuenta de trabajador está suspendida.</p>
+    <div class="actions">
+      <button class="btn" *ngIf="cuenta.estado === 'activo'" (click)="abrirPerfil()">Editar perfil</button>
+      <button class="btn btn-outline" *ngIf="tieneRol('cliente') && cuenta.estado === 'activo'" (click)="solicitar()">Mis solicitudes</button>
+      <button class="btn btn-outline" *ngIf="acceso('panel-trabajador')" (click)="navegar('panel-trabajador')">Área de trabajador</button>
+      <button class="btn btn-outline" *ngIf="acceso('panel-administracion')" (click)="navegar('panel-administracion')">Área de administración</button>
+      <button class="btn btn-outline" *ngIf="acceso('panel-superadministracion')" (click)="navegar('panel-superadministracion')">Área de superadministración</button>
+    </div>
+  </section>
+  <section class="page-shell admin-workspace" *ngIf="areaAdministrativa as area" [class.superadmin-workspace]="area === 'panel-superadministracion'" aria-labelledby="admin-titulo">
+    <header class="admin-heading">
+      <div class="admin-heading-copy">
+        <span class="workspace-eyebrow">{{ area === 'panel-administracion' ? 'GESTIÓN DEL EQUIPO' : 'SUPERVISIÓN DE PLATAFORMA' }}</span>
+        <h1 id="admin-titulo">{{ area === 'panel-administracion' ? 'Administración' : 'Superadministración' }}</h1>
+        <p>{{ area === 'panel-administracion' ? 'Atiende trabajadores, reclamos y movimientos de la operación diaria.' : 'Revisa casos escalados y supervisa situaciones excepcionales.' }}</p>
+      </div>
+      <span class="workspace-role-chip">{{ area === 'panel-administracion' ? 'Administrador' : 'Superadministrador' }}</span>
+    </header>
+    <div class="admin-layout">
+      <aside class="admin-sidebar" aria-label="Módulos administrativos">
+        <h2>{{ area === 'panel-administracion' ? 'Operación diaria' : 'Supervisión global' }}</h2>
+        <button *ngFor="let item of seccionesPorPanel[area]" type="button" (click)="navegar(item.vista)"
+                [attr.aria-current]="moduloAdministrativo === item.vista ? 'page' : null">
+          {{ item.titulo }}
+        </button>
+      </aside>
+      <div class="admin-content" [ngSwitch]="moduloAdministrativo">
+        <app-documentacion-trabajador *ngSwitchCase="'documentacion-trabajador'"></app-documentacion-trabajador>
+        <app-gestion-reclamos *ngSwitchCase="'gestion-reclamos'"></app-gestion-reclamos>
+        <app-revision-discrepancias-pago *ngSwitchCase="'revision-pagos'"></app-revision-discrepancias-pago>
+        <app-incidentes-sanciones *ngSwitchCase="'incidentes'"></app-incidentes-sanciones>
+        <app-aprobacion-desembolsos *ngSwitchCase="'aprobacion-desembolsos'"></app-aprobacion-desembolsos>
+        <app-gestion-revision-asistencia *ngSwitchCase="'revisiones-asistencia'"></app-gestion-revision-asistencia>
+        <app-candidatos-asistencia *ngSwitchCase="'candidatos-asistencia'"></app-candidatos-asistencia>
+      </div>
+    </div>
+  </section>
+  <section class="page-shell role-panel" *ngIf="cuenta && vista === 'panel-trabajador' && seccionesRol.length">
+    <header class="role-heading">
+      <div>
+        <span class="workspace-eyebrow">ESPACIO DE TRABAJO · TRABAJADOR</span>
+        <h1>Solicitudes y trabajos</h1>
+        <p>Encuentra oportunidades y organiza cada etapa de tus servicios.</p>
+      </div>
+      <div class="role-welcome"><span>Sesión activa</span><strong>{{ cuenta.nombre }}</strong></div>
+    </header>
+    <div class="role-grid">
+      <button class="role-card" type="button" *ngFor="let seccion of seccionesRol" (click)="navegar(seccion.vista)">
+        <strong>{{ seccion.titulo }}</strong>
+        <span>{{ seccion.detalle }}</span>
+      </button>
+    </div>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'perfil-trabajador' && cuenta && acceso(vista)">
+    <app-perfil-trabajador [usuarioId]="cuenta.usuarioId"></app-perfil-trabajador>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'documentos-trabajador' && cuenta && acceso(vista)">
+    <app-documentos-trabajador [usuarioId]="cuenta.usuarioId"></app-documentos-trabajador>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'solicitudes-trabajador' && cuenta && acceso(vista)">
+    <app-solicitudes-trabajador [usuarioId]="cuenta.usuarioId"></app-solicitudes-trabajador>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'cuenta-trabajador' && cuenta && acceso(vista)">
+    <app-cuenta-trabajador [usuarioId]="cuenta.usuarioId" (estadoActualizado)="cargarCuenta()"></app-cuenta-trabajador>
+    <button class="btn" (click)="navegar('desembolso-trabajador')">Solicitar desembolso</button>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'desembolso-trabajador' && cuenta && acceso(vista)">
+    <app-desembolso-trabajador></app-desembolso-trabajador>
+  </section>
+  <section class="page-shell" *ngIf="(vista.indexOf('panel-') === 0 || ['perfil-trabajador','documentos-trabajador','solicitudes-trabajador','cuenta-trabajador','desembolso-trabajador','documentacion-trabajador','gestion-reclamos','revision-pagos','incidentes','revisiones-asistencia','candidatos-asistencia','aprobacion-desembolsos'].includes(vista)) && !acceso(vista)">
+    <h1>{{ cuenta ? 'Acceso restringido' : 'Inicia sesión para continuar' }}</h1>
+    <p *ngIf="cuenta">Tu cuenta no tiene acceso a esta sección.</p>
+    <button class="btn" *ngIf="!cuenta" (click)="modal='sesion'">Iniciar sesión</button>
+    <button class="btn" *ngIf="cuenta" (click)="navegar(panelPrincipal)">Volver a mi área</button>
+  </section>
   <section class="page-shell info-page" *ngIf="vista === 'como'">
     <span class="eyebrow">DE LA IDEA AL TRABAJO TERMINADO</span>
     <h1>¿Cómo funciona?</h1>
@@ -349,16 +444,61 @@
       <p class="muted">Perfil de demostración para revisar el diseño.</p>
       <button class="btn" (click)="solicitar()">Solicitar cotización</button>
     </ng-container>
+    <ng-container *ngIf="modal === 'editar-perfil'">
+      <h2 id="modalTitulo">Editar perfil</h2>
+      <form class="account-form" #formPerfil="ngForm" (ngSubmit)="guardarPerfil()">
+        <label>Nombre<input name="nombre" [(ngModel)]="datosPerfil.nombre" required minlength="2" maxlength="100"></label>
+        <label>Teléfono<input name="telefono" type="tel" [(ngModel)]="datosPerfil.telefono" maxlength="30"></label>
+        <label>Correo de contacto<input name="correo" type="email" [(ngModel)]="datosPerfil.correoContacto" maxlength="254"></label>
+        <label>Dirección<input name="direccion" [(ngModel)]="datosPerfil.direccion" maxlength="500"></label>
+        <p *ngIf="errorCuenta" role="alert">{{ errorCuenta }}</p>
+        <button class="btn" type="submit" [disabled]="formPerfil.invalid || guardandoCuenta">Guardar cambios</button>
+      </form>
+    </ng-container>
     <ng-container *ngIf="modal === 'sesion' || modal === 'registro'">
       <h2 id="modalTitulo">{{ modal === 'sesion' ? 'Iniciar sesión' : 'Crear una cuenta' }}</h2>
-      <p>El acceso de clientes y trabajadores se implementará en su caso de uso de autenticación.</p>
-      <p class="muted">Puedes explorar el catálogo real y recorrer los perfiles de demostración.</p>
-      <button class="btn" (click)="modal=''; navegar('servicios')">Explorar servicios</button>
+      <form class="account-form" #formCuenta="ngForm" (ngSubmit)="enviarCuenta()">
+        <label *ngIf="modal === 'registro'">Nombre
+          <input name="nombre" [(ngModel)]="credenciales.nombre" required maxlength="100" autocomplete="name">
+        </label>
+        <label *ngIf="modal === 'registro'">¿Cómo usarás Arréglalo Ya?
+          <select name="rol" [(ngModel)]="credenciales.rol" required>
+            <option value="cliente">Necesito un servicio</option>
+            <option value="trabajador">Quiero ofrecer mis servicios</option>
+          </select>
+        </label>
+        <ng-container *ngIf="modal === 'registro' && credenciales.rol === 'trabajador'">
+          <label>Zona de atención
+            <select name="zonaId" [(ngModel)]="credenciales.zonaId" required>
+              <option value="">Selecciona tu zona</option>
+              <option *ngFor="let zona of zonasRegistro" [value]="zona.id">{{ zona.nombre }}</option>
+            </select>
+          </label>
+          <p *ngIf="errorZonasRegistro" role="alert">{{ errorZonasRegistro }}</p>
+          <p class="signup-hint">Después podrás añadir tus servicios y presentar tus documentos para revisión.</p>
+        </ng-container>
+        <label>Correo electrónico
+          <input type="email" name="correo" [(ngModel)]="credenciales.identificadorAcceso" required email autocomplete="username">
+        </label>
+        <label>Contraseña
+          <input type="password" name="contrasena" [(ngModel)]="credenciales.contrasena" required
+                 [attr.autocomplete]="modal === 'registro' ? 'new-password' : 'current-password'">
+        </label>
+        <p role="alert" *ngIf="errorCuenta">{{ errorCuenta }}</p>
+        <button class="btn" type="submit" [disabled]="formCuenta.invalid || guardandoCuenta">
+          {{ modal === 'sesion' ? 'Entrar' : 'Crear cuenta' }}
+        </button>
+      </form>
+      <p class="account-switch">
+        {{ modal === 'sesion' ? '¿Aún no tienes cuenta?' : '¿Ya tienes cuenta?' }}
+        <button type="button" (click)="alternarAcceso()">
+          {{ modal === 'sesion' ? 'Crear una cuenta' : 'Iniciar sesión' }}
+        </button>
+      </p>
     </ng-container>
     <ng-container *ngIf="modal === 'sesion-requerida'">
     <h2 id="modalTitulo">Inicia sesión para solicitar una cotización</h2>
-    <p>El acceso de clientes aún está en desarrollo. Las solicitudes estarán disponibles cuando puedas iniciar sesión.</p>
-    <button class="btn" (click)="modal=''">Volver</button>
+    <button class="btn" (click)="modal='sesion'">Iniciar sesión</button>
   </ng-container>
  </section>
 </div>

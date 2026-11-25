@@ -1,0 +1,151 @@
+<div class="editorial-columns worker-columns">
+
+<div class="solicitudes-container">
+
+  <div class="encabezado">
+    <div>
+      <span class="worker-eyebrow">OPORTUNIDADES PARA TU PERFIL</span>
+      <h2 class="panel-title">Solicitudes disponibles</h2>
+      <p>Encuentra oportunidades para ofrecer tus servicios.</p>
+    </div>
+
+    <button
+      type="button" class="btn btn-outline"
+      (click)="cargarSolicitudes()"
+      [disabled]="cargando">
+      Actualizar
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="mensaje">
+    Cargando solicitudes...
+  </div>
+
+  <div *ngIf="error" class="mensaje error" role="alert">
+    <p>{{ error }}</p>
+    <button type="button" class="btn btn-outline" (click)="cargarSolicitudes()">Reintentar</button>
+  </div>
+
+  <div
+    *ngIf="!cargando && !error && solicitudes.length === 0"
+    class="mensaje vacio">
+    <h3>No hay solicitudes disponibles</h3>
+    <p>
+      Por el momento no encontramos solicitudes compatibles
+      con tus servicios y zona de atención.
+    </p>
+  </div>
+
+  <div class="lista-solicitudes"
+       *ngIf="!cargando && !error && solicitudes.length > 0">
+
+    <article class="solicitud-card"
+      *ngFor="let solicitud of solicitudes; trackBy: trackBySolicitud">
+
+      <div class="card-header">
+        <span class="estado">Publicada</span>
+
+        <span class="urgente" *ngIf="solicitud.urgente">
+          Urgente
+        </span>
+      </div>
+
+      <h2>Solicitud #{{ solicitud.solicitudId }}</h2>
+
+      <p class="descripcion">
+        {{ solicitud.descripcion }}
+      </p>
+
+      <div class="datos">
+        <p>
+          <strong>Zona:</strong>
+          {{ solicitud.zona }}
+        </p>
+
+        <p>
+          <strong>Presupuesto aproximado:</strong>
+          <span *ngIf="solicitud.presupuestoAproximado !== null">
+            {{ solicitud.presupuestoAproximado | currency:'BOB':'Bs. ':'1.2-2' }}
+          </span>
+          <span *ngIf="solicitud.presupuestoAproximado === null">
+            No especificado
+          </span>
+        </p>
+
+        <p>
+          <strong>Fecha:</strong>
+          {{ solicitud.creadaEn | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+
+      <div class="servicios">
+        <h3>Servicios solicitados</h3>
+
+        <div class="servicio-item"
+          *ngFor="let servicio of solicitud.servicios">
+
+          <strong>{{ servicio.categoria }}</strong>
+
+          <p *ngIf="servicio.descripcion">
+            {{ servicio.descripcion }}
+          </p>
+
+        </div>
+      </div>
+
+      <button class="btn" type="button" (click)="presentar(solicitud.solicitudId)" [disabled]="enviando">Presentar oferta</button>
+    </article>
+
+  </div>
+
+</div>
+
+<section class="solicitudes-container worker-offers" aria-label="Mis ofertas">
+  <div class="worker-section-heading">
+    <div>
+      <span class="worker-eyebrow">SEGUIMIENTO</span>
+      <h2 class="panel-title">Mis ofertas</h2>
+    </div>
+    <span class="offer-count">{{ ofertas.length }}</span>
+  </div>
+  <p *ngIf="aviso" role="status">{{ aviso }}</p>
+  <p *ngIf="cargandoOfertas" class="mensaje" role="status">Cargando ofertas…</p>
+  <p *ngIf="errorOferta" class="mensaje error" role="alert">{{ errorOferta }}</p>
+  <button *ngIf="falloCargaOfertas" class="btn btn-outline" type="button" (click)="cargarOfertas()">Reintentar</button>
+  <div class="worker-empty" *ngIf="!ofertas.length && !cargandoOfertas && !falloCargaOfertas">
+    <span aria-hidden="true">↗</span>
+    <strong>Aún no has presentado ofertas</strong>
+    <p>Cuando respondas a una solicitud, podrás seguir aquí cada avance.</p>
+  </div>
+  <article class="worker-offer-card" *ngFor="let oferta of ofertas">
+    <h3>Oferta #{{ oferta.id }} · {{ oferta.estado }}</h3>
+    <p>Solicitud #{{ oferta.solicitudId }} · {{ oferta.descripcion }}</p>
+    <p *ngIf="oferta.visitaProgramada">Visita {{ oferta.estadoVisita }} · {{ oferta.visitaProgramada | date:'short' }}</p>
+    <p *ngIf="oferta.cotizacionId">Cotización #{{ oferta.cotizacionId }} · {{ oferta.decision || 'pendiente de decisión' }}</p>
+    <div class="reservation-actions" *ngIf="oferta.reservaId">
+      <a class="btn btn-outline" [href]="'?finalizarReserva=' + oferta.reservaId + '&rol=trabajador'">Iniciar o finalizar servicio</a>
+      <a class="btn btn-outline" [href]="'?cancelarServicio=' + oferta.reservaId">Cancelar servicio reservado</a>
+    </div>
+    <ng-container *ngIf="oferta.estado === 'presentada'">
+      <button *ngIf="!oferta.visitaId || oferta.estadoVisita === 'cancelada'" class="btn btn-outline" type="button" (click)="abrirOferta(oferta.id)">Programar visita</button>
+      <button *ngIf="oferta.estadoVisita === 'programada'" class="btn btn-outline" type="button"
+              (click)="realizar(oferta.id)" [disabled]="enviando">Registrar visita realizada</button>
+      <button *ngIf="oferta.estadoVisita === 'realizada'" class="btn btn-outline" type="button"
+              (click)="abrirOferta(oferta.id)">Preparar cotización</button>
+      <form *ngIf="ofertaEditada === oferta.id" #formOferta="ngForm"
+            (ngSubmit)="oferta.estadoVisita === 'realizada' ? cotizar(oferta.id) : programar(oferta.id)">
+        <ng-container *ngIf="oferta.estadoVisita === 'realizada'">
+          <label>Mano de obra (BOB)<input name="manoObra" [(ngModel)]="manoObra" inputmode="decimal" required></label>
+          <label>Materiales (BOB)<input name="materiales" [(ngModel)]="materiales" inputmode="decimal" required></label>
+          <label>Transporte (BOB)<input name="transporte" [(ngModel)]="transporte" inputmode="decimal" required></label>
+        </ng-container>
+        <label>{{ oferta.estadoVisita === 'realizada' ? 'Vigente hasta' : 'Horario acordado' }}
+          <input type="datetime-local" name="fecha" [(ngModel)]="fecha" required>
+        </label>
+        <button class="btn" type="submit" [disabled]="formOferta.invalid || enviando">Guardar</button>
+      </form>
+    </ng-container>
+  </article>
+</section>
+
+</div>

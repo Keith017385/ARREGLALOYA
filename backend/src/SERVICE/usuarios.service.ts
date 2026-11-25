@@ -68,6 +68,10 @@ import{DatosRegistro, PerfilUsuario} from '../CORE/usuarios/usuario';
     return this.consultarPerfil(usuarioId);
   }
 
+  listarZonasRegistro() {
+    return this.usuariosRepository.zonasRegistro();
+  }
+
 async registrarUsuario(datos: DatosRegistro) {
 
   // 1. Comprobar los datos obligatorios.
@@ -87,6 +91,22 @@ async registrarUsuario(datos: DatosRegistro) {
 
   const identificadorAcceso =
     datos.identificadorAcceso.trim().toLowerCase();
+
+  const rol = datos.rol === undefined ? 'cliente' : datos.rol;
+  if (rol !== 'cliente' && rol !== 'trabajador') {
+    throw new BadRequestException('Selecciona cliente o trabajador para crear la cuenta.');
+  }
+  let zonaId: string | undefined;
+  if (rol === 'trabajador') {
+    if (typeof datos.zonaId !== 'string' || !/^[1-9][0-9]{0,18}$/.test(datos.zonaId) || BigInt(datos.zonaId) > 9223372036854775807n) {
+      throw new BadRequestException('Selecciona una zona de atención válida.');
+    }
+    const zonas = await this.usuariosRepository.zonasRegistro();
+    if (!zonas.some(zona => zona.id === datos.zonaId)) {
+      throw new BadRequestException('La zona seleccionada no está disponible.');
+    }
+    zonaId = datos.zonaId;
+  }
 
   // 3. Validar los valores.
   if (
@@ -112,7 +132,9 @@ async registrarUsuario(datos: DatosRegistro) {
     const usuario = await this.usuariosRepository.registrarCuenta({
       nombre,
       identificadorAcceso,
-      hashCredencial
+      hashCredencial,
+      rol,
+      zonaId,
     });
 
     return {
@@ -132,6 +154,13 @@ async registrarUsuario(datos: DatosRegistro) {
       throw new ConflictException(
         'Ya existe una cuenta con esos datos'
       );
+    }
+
+    if (
+      rol === 'trabajador' && typeof error === 'object' && error !== null &&
+      'code' in error && error.code === '23503'
+    ) {
+      throw new BadRequestException('La zona seleccionada ya no está disponible.');
     }
 
     throw error;

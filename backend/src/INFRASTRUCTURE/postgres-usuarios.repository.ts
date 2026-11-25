@@ -22,6 +22,13 @@ export class PostgresUsuariosRepository
     super();
   }
 
+  async zonasRegistro(): Promise<{ id: string; nombre: string }[]> {
+    const { rows } = await this.db.pool.query<{ id: string; nombre: string }>(`
+      SELECT zona_id::text AS id, nombre FROM arreglalo.zona ORDER BY nombre
+    `);
+    return rows;
+  }
+
   async roles(usuarioId: string): Promise<RolUsuario[]> {
     const { rows } = await this.db.pool.query<{ codigo: RolUsuario }>(`
       SELECT r.codigo FROM arreglalo.usuario_rol ur
@@ -165,11 +172,18 @@ async registrarCuenta(datos: NuevaCuenta): Promise<Usuario> {
       FROM arreglalo.rol
       WHERE codigo = $2
       `,
-      [usuario.usuarioId, 'cliente']
+      [usuario.usuarioId, datos.rol]
     );
 
     if (asignacion.rowCount !== 1) {
-      throw new Error('No existe el rol cliente');
+      throw new Error('No existe el rol solicitado');
+    }
+
+    if (datos.rol === 'trabajador') {
+      await cliente.query(
+        `INSERT INTO arreglalo.trabajador (usuario_id, zona_id) VALUES ($1, $2)`,
+        [usuario.usuarioId, datos.zonaId],
+      );
     }
 
     // Confirmamos todos los cambios.

@@ -25,7 +25,7 @@ En una base de desarrollo vacía, instala primero `01_esquema.sql` y `02_reglas_
 - `11_historial_solicitud.sql`
 - `12_sesion_http.sql`
 
-En una base compartida, el propietario debe aplicar solo las migraciones pendientes y otorgar al usuario del backend los permisos de acceso correspondientes. Configura un `SESSION_SECRET` aleatorio de al menos 32 caracteres. Las zonas se cargan por entorno y deben existir para publicar solicitudes. Las cuentas nuevas reciben el rol cliente; la administración de la base debe asignar los demás roles.
+En desarrollo local, las sesiones se guardan en memoria y se reinician al detener el backend. En producción, aplica `12_sesion_http.sql` antes de iniciar el servicio y otorga al usuario del backend permisos sobre esa tabla; configura un `SESSION_SECRET` aleatorio de al menos 32 caracteres. En una base compartida, el propietario debe aplicar solo las migraciones pendientes y otorgar los permisos de acceso correspondientes. Las zonas se cargan por entorno y deben existir para publicar solicitudes. Las cuentas nuevas reciben el rol cliente; la administración de la base debe asignar los demás roles.
 
 ## Ejecutar el backend
 

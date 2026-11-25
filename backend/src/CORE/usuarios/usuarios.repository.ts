@@ -13,6 +13,7 @@ export abstract class UsuariosRepository
         identificador: string
     ): Promise<CuentaAcceso | null>
 
+    abstract zonasRegistro(): Promise<{ id: string; nombre: string }[]>;
     abstract roles(usuarioId: string): Promise<RolUsuario[]>;
     abstract editarPerfil(usuarioId: string, cambios: Omit<PerfilUsuario, 'usuarioId'>): Promise<boolean>;
 

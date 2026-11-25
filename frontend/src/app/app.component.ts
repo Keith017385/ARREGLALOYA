@@ -15,6 +15,17 @@ interface PerfilCuenta {
   direccion: string | null;
 }
 
+interface ZonaRegistro { id: string; nombre: string; }
+interface SeccionPanel { vista: string; titulo: string; detalle: string; }
+interface EjemploDemo { nombre: string; detalle: string; accion: string; resultado: string; }
+interface CredencialesCuenta {
+  nombre: string;
+  identificadorAcceso: string;
+  contrasena: string;
+  rol: 'cliente' | 'trabajador';
+  zonaId: string;
+}
+
 @Component({ selector: 'app-root', templateUrl: './app.component.html' })
 export class AppComponent implements OnInit, OnDestroy {
   vista = 'inicio'; q = ''; categorias: Categoria[] = [];
@@ -34,9 +45,43 @@ export class AppComponent implements OnInit, OnDestroy {
 
   cuenta: PerfilCuenta | null = null;
   datosPerfil = { nombre: '', telefono: '', correoContacto: '', direccion: '' };
-  credenciales = { nombre: '', identificadorAcceso: '', contrasena: '' };
+  credenciales: CredencialesCuenta = {
+    nombre: '', identificadorAcceso: '', contrasena: '', rol: 'cliente', zonaId: '',
+  };
   errorCuenta = '';
   guardandoCuenta = false;
+  mensajeCuenta = '';
+  zonasRegistro: ZonaRegistro[] = [];
+  errorZonasRegistro = '';
+  cargandoZonasRegistro = false;
+
+  moduloAdministrativo = 'documentacion-trabajador';
+  readonly seccionesPorPanel: { [panel: string]: SeccionPanel[] } = {
+    'panel-administracion': [
+      { vista: 'documentacion-trabajador', titulo: 'Documentación de trabajadores', detalle: 'Revisa los documentos y registra el resultado.' },
+      { vista: 'gestion-reclamos', titulo: 'Reclamos formales', detalle: 'Analiza los antecedentes y resuelve casos.' },
+      { vista: 'revision-pagos', titulo: 'Discrepancias de pago', detalle: 'Revisa declaraciones de pago en disputa.' },
+      { vista: 'incidentes', titulo: 'Incidentes y sanciones', detalle: 'Registra incidentes confirmados y aplica medidas.' },
+      { vista: 'aprobacion-desembolsos', titulo: 'Aprobación de desembolsos', detalle: 'Consulta respaldos y registra una decisión.' },
+    ],
+    'panel-superadministracion': [
+      { vista: 'revisiones-asistencia', titulo: 'Revisión de casos escalados', detalle: 'Resuelve revisiones excepcionales de asistencia.' },
+      { vista: 'candidatos-asistencia', titulo: 'Casos para escalar', detalle: 'Supervisa casos que requieren intervención global.' },
+    ],
+  };
+  readonly seccionesTrabajador: SeccionPanel[] = [
+    { vista: 'solicitudes-trabajador', titulo: 'Solicitudes y ofertas', detalle: 'Encuentra trabajos y envía tus propuestas.' },
+    { vista: 'perfil-trabajador', titulo: 'Perfil y servicios', detalle: 'Administra tu perfil y las categorías que atiendes.' },
+    { vista: 'documentos-trabajador', titulo: 'Mis documentos', detalle: 'Presenta y consulta el estado de tus documentos.' },
+    { vista: 'cuenta-trabajador', titulo: 'Mi cuenta de trabajador', detalle: 'Consulta el estado y administra tu cuenta.' },
+  ];
+  readonly ejemplosDemo: EjemploDemo[] = [
+    { nombre: 'Enviar una oferta', detalle: 'El trabajador revisa la solicitud y propone una visita.', accion: 'Simular envío de oferta', resultado: 'La oferta de demostración quedó enviada.' },
+    { nombre: 'Aceptar una cotización', detalle: 'El cliente compara la propuesta antes de reservar.', accion: 'Simular aceptación', resultado: 'La cotización de demostración quedó aceptada.' },
+    { nombre: 'Finalizar un servicio', detalle: 'Cliente y trabajador confirman que el trabajo terminó.', accion: 'Simular finalización', resultado: 'La finalización de demostración quedó registrada.' },
+  ];
+  demoActual: EjemploDemo = this.ejemplosDemo[0];
+  demoMensaje = '';
 
   constructor(private readonly catalogo: CatalogoService, private readonly http: HttpClient) {}
 
@@ -78,17 +123,80 @@ export class AppComponent implements OnInit, OnDestroy {
   enviarCuenta(): void {
     const registro = this.modal === 'registro';
     this.errorCuenta = '';
+    this.mensajeCuenta = '';
+    if (registro && this.credenciales.rol === 'trabajador' && !this.credenciales.zonaId) {
+      this.errorCuenta = 'Selecciona tu zona de atención.';
+      return;
+    }
     this.guardandoCuenta = true;
-    this.http.post('/api/usuarios/' + (registro ? 'registro' : 'sesion'), this.credenciales).subscribe(
+    const datos = registro ? this.credenciales : {
+      identificadorAcceso: this.credenciales.identificadorAcceso,
+      contrasena: this.credenciales.contrasena,
+    };
+    this.http.post('/api/usuarios/' + (registro ? 'registro' : 'sesion'), datos).subscribe(
       () => {
         this.guardandoCuenta = false;
         this.credenciales.contrasena = '';
-        this.modal = registro ? 'sesion' : '';
-        if (!registro) { this.cargarCuenta(); }
+        if (registro) {
+          this.modal = 'sesion';
+          this.mensajeCuenta = 'Cuenta creada. Ahora inicia sesión con tu correo y contraseña.';
+          return;
+        }
+        this.modal = '';
+        this.cargarCuenta();
       },
       error => {
         this.guardandoCuenta = false;
         this.errorCuenta = (error.error && error.error.message) || 'No se pudo completar la operación.';
+      }
+    );
+  }
+
+  abrirSesion(): void {
+    this.modal = 'sesion';
+    this.errorCuenta = '';
+    this.mensajeCuenta = '';
+    this.menuAbierto = false;
+  }
+
+  abrirRegistro(): void {
+    this.modal = 'registro';
+    this.errorCuenta = '';
+    this.mensajeCuenta = '';
+    this.credenciales.nombre = '';
+    this.credenciales.rol = 'cliente';
+    this.credenciales.zonaId = '';
+    this.menuAbierto = false;
+    this.errorZonasRegistro = '';
+  }
+
+  alternarAcceso(): void {
+    if (this.modal === 'sesion') { this.abrirRegistro(); }
+    else { this.abrirSesion(); }
+  }
+
+  cerrarModal(): void {
+    this.modal = '';
+    this.errorCuenta = '';
+    this.mensajeCuenta = '';
+  }
+
+  cambiarRolRegistro(rol: string): void {
+    this.credenciales.rol = rol === 'trabajador' ? 'trabajador' : 'cliente';
+    this.credenciales.zonaId = '';
+    this.errorZonasRegistro = '';
+    if (this.credenciales.rol !== 'trabajador') { return; }
+    this.cargandoZonasRegistro = true;
+    this.http.get<ZonaRegistro[]>('/api/usuarios/zonas').subscribe(
+      zonas => {
+        this.zonasRegistro = zonas || [];
+        this.cargandoZonasRegistro = false;
+        if (!this.zonasRegistro.length) { this.errorZonasRegistro = 'No hay zonas disponibles para el registro.'; }
+      },
+      () => {
+        this.zonasRegistro = [];
+        this.cargandoZonasRegistro = false;
+        this.errorZonasRegistro = 'No pudimos cargar las zonas. Intenta de nuevo.';
       }
     );
   }
@@ -171,7 +279,21 @@ export class AppComponent implements OnInit, OnDestroy {
     );
   }
   navegar(vista: string) {
-    this.vista = vista; this.menuAbierto = false; window.scrollTo(0, 0);
+    const panelModulo = this.panelParaModulo(vista);
+    if (panelModulo && this.acceso(panelModulo)) {
+      this.moduloAdministrativo = vista;
+      this.vista = panelModulo;
+    } else {
+      this.vista = vista;
+    }
+    this.menuAbierto = false;
+    window.scrollTo(0, 0);
+    if (vista === 'panel-administracion' || vista === 'panel-superadministracion') {
+      const secciones = this.seccionesPorPanel[vista] || [];
+      if (!secciones.some(seccion => seccion.vista === this.moduloAdministrativo)) {
+        this.moduloAdministrativo = secciones.length ? secciones[0].vista : '';
+      }
+    }
     if (vista === 'inicio' && this.q) { this.filtrar(''); }
   }
   buscar() { this.categoriaActiva = ''; this.navegar('servicios'); this.cargar(); }
@@ -183,6 +305,44 @@ export class AppComponent implements OnInit, OnDestroy {
     this.modal = '';
     this.tipoOperacion = '';
     this.navegar('solicitud');
+  }
+
+  acceso(vista: string): boolean {
+    if (!this.cuenta || this.cuenta.estado !== 'activo') { return false; }
+    if (vista === 'panel-trabajador' || ['perfil-trabajador', 'documentos-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador'].includes(vista)) {
+      return this.tieneRol('trabajador');
+    }
+    if (vista === 'panel-administracion' || ['documentacion-trabajador', 'gestion-reclamos', 'revision-pagos', 'incidentes', 'aprobacion-desembolsos'].includes(vista)) {
+      return this.tieneRol('administrador');
+    }
+    if (vista === 'panel-superadministracion' || ['revisiones-asistencia', 'candidatos-asistencia'].includes(vista)) {
+      return this.tieneRol('superadministrador');
+    }
+    return false;
+  }
+
+  get areaAdministrativa(): string | null {
+    if (this.vista === 'panel-administracion' && this.acceso(this.vista)) { return this.vista; }
+    if (this.vista === 'panel-superadministracion' && this.acceso(this.vista)) { return this.vista; }
+    return null;
+  }
+
+  get seccionesRol(): SeccionPanel[] {
+    return this.acceso('panel-trabajador') ? this.seccionesTrabajador : [];
+  }
+
+  get panelPrincipal(): string {
+    if (this.acceso('panel-superadministracion')) { return 'panel-superadministracion'; }
+    if (this.acceso('panel-administracion')) { return 'panel-administracion'; }
+    if (this.acceso('panel-trabajador')) { return 'panel-trabajador'; }
+    return this.tieneRol('cliente') ? 'solicitud' : 'inicio';
+  }
+
+  private panelParaModulo(vista: string): string | null {
+    for (const panel of Object.keys(this.seccionesPorPanel)) {
+      if (this.seccionesPorPanel[panel].some(seccion => seccion.vista === vista)) { return panel; }
+    }
+    return null;
   }
 
   get categoriaSeleccionada(): string {

@@ -25,6 +25,10 @@ export class UsuariosController{
         private readonly autenticacion: AutenticacionService
     ){}
 
+@Get('zonas')
+zonasRegistro() {
+  return this.usuariosService.listarZonasRegistro();
+}
 
 @Post('sesion')
 @HttpCode(200)

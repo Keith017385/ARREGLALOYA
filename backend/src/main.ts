@@ -1,10 +1,11 @@
-// CU-01: sesiones de usuario guardadas en PostgreSQL (sin JWT).
-// Las credenciales y el secreto de sesion se leen desde backend/.env.
+// CU-01: autenticación con sesión (sin JWT).
+// En local se usa el almacén en memoria; producción usa arreglalo.sesion_http.
+// Las credenciales y el secreto se leen desde backend/.env.
 import 'dotenv/config';
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import session from 'express-session';
+import session, { type SessionOptions } from 'express-session';
 import type { Request, Response, NextFunction } from 'express';
 import connectPgSimple from 'connect-pg-simple';
 import { UsuariosRepository } from './CORE/usuarios/usuarios.repository';
@@ -30,14 +31,7 @@ async function iniciar(): Promise<void> {
   // No se crea otro DbService ni un segundo Pool.
   const db = app.get(DbService);
 
-  app.use(
-    session({
-      store: new PgSession({
-        pool: db.pool,
-        schemaName: 'arreglalo',
-        tableName: 'sesion_http',
-        createTableIfMissing: true,
-      }),
+  const opcionesSesion: SessionOptions = {
       name: 'arreglalo.sid',
       secret: secreto,
       resave: false,
@@ -48,8 +42,24 @@ async function iniciar(): Promise<void> {
         secure: process.env.NODE_ENV === 'production',
         maxAge: 8 * 60 * 60 * 1000,
       },
-    }),
-  );
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    // En producción, la migración de sesion_http y sus permisos se preparan
+    // antes de arrancar; el usuario de la aplicación no necesita CREATE en el esquema.
+    opcionesSesion.store = new PgSession({
+      pool: db.pool,
+      schemaName: 'arreglalo',
+      tableName: 'sesion_http',
+      createTableIfMissing: false,
+    });
+  } else {
+    // El almacén en memoria permite ejecutar el demo local cuando el rol de
+    // PostgreSQL no tiene permisos para crear tablas dentro de arreglalo.
+    console.warn('Sesiones locales en memoria; configura el almacén PostgreSQL en producción.');
+  }
+
+  app.use(session(opcionesSesion));
 
   const usuarios = app.get(UsuariosRepository);
   app.use(async (req: Request & { user?: { usuarioId: string } }, _res: Response, next: NextFunction) => {
@@ -71,8 +81,9 @@ async function iniciar(): Promise<void> {
   app.setGlobalPrefix('api');
 
   // El proxy de Angular usa la API local.
-  await app.listen(3000, '127.0.0.1');
-  console.log('API local: http://127.0.0.1:3000/api');
+  const puerto = Number(process.env.PORT) || 3000;
+  await app.listen(puerto, '127.0.0.1');
+  console.log(`API local: http://127.0.0.1:${puerto}/api`);
 }
 
 iniciar().catch((error: unknown) => {

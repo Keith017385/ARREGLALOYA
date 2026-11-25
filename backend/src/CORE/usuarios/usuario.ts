@@ -25,10 +25,14 @@ export interface CuentaAcceso{
 }
 
 // Datos que escribe una persona al registrarse.
+export type RolAutoregistro = 'cliente' | 'trabajador';
+export interface ZonaRegistro { id: string; nombre: string; }
 export interface DatosRegistro {
   nombre: string;
   identificadorAcceso: string;
   contrasena: string;
+  rol?: RolAutoregistro;
+  zonaId?: string;
 }
 
 // Datos preparados para guardar en PostgreSQL.
@@ -36,4 +40,6 @@ export interface NuevaCuenta {
   nombre: string;
   identificadorAcceso: string;
   hashCredencial: string;
+  rol: RolAutoregistro;
+  zonaId?: string;
 }

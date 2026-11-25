@@ -68,7 +68,7 @@
       <button class="btn btn-outline small" (click)="cerrarSesion()">Cerrar sesión</button>
     </div>
     <div class="account-actions guest-actions" *ngIf="!cuenta">
-      <button class="btn btn-outline small" (click)="modal='sesion'">Iniciar sesión</button>
+      <button class="btn btn-outline small" type="button" (click)="abrirSesion()">Iniciar sesión</button>
       <button class="btn small" (click)="abrirRegistro()">Registrarse</button>
     </div>
     <button class="mobile-menu" aria-label="Abrir menú" [attr.aria-expanded]="menuAbierto" (click)="menuAbierto = !menuAbierto">
@@ -85,7 +85,7 @@
     <button *ngIf="acceso('panel-administracion')" (click)="navegar('panel-administracion')">Administración</button>
     <button *ngIf="acceso('panel-superadministracion')" (click)="navegar('panel-superadministracion')">Superadministración</button>
     <ng-container *ngIf="!cuenta">
-      <button (click)="menuAbierto=false; modal='sesion'">Iniciar sesión</button>
+      <button (click)="abrirSesion()">Iniciar sesión</button>
       <button (click)="menuAbierto=false; abrirRegistro()">Registrarse</button>
     </ng-container>
     <button *ngIf="cuenta" (click)="navegar('mi-cuenta')">Mi cuenta</button>
@@ -101,7 +101,7 @@
         <button class="btn" type="button" (click)="navegar('servicios')">Explorar servicios <span aria-hidden="true">→</span></button>
       </div>
       <div class="hero-art">
-        <img src="assets/inicio-tecnico.jpg" alt="Técnico revisando la instalación de un fregadero" width="993" height="442" fetchpriority="high">
+        <img src="assets/inicio-tecnico.png" alt="Técnico revisando la instalación de un fregadero" width="1672" height="944" fetchpriority="high">
       </div>
     </section>
     <section class="benefits" aria-label="Cómo te ayudamos">
@@ -159,7 +159,7 @@
       </div>
     </section>
     <section class="page-shell home-story">
-      <img src="assets/inicio-equipo.jpg" alt="Dos profesionales revisando una reparación en una vivienda" width="1313" height="443" loading="lazy">
+      <img src="assets/inicio-equipo.png" alt="Profesionales explicando una reparación a una clienta en su hogar" width="1672" height="944" loading="lazy">
       <div>
         <h2>Encuentra ayuda para tu hogar</h2>
         <p>Explora los servicios disponibles en Cochabamba y describe el trabajo que necesitas.</p>
@@ -394,7 +394,7 @@
   <section class="page-shell" *ngIf="(vista.indexOf('panel-') === 0 || ['perfil-trabajador','documentos-trabajador','solicitudes-trabajador','cuenta-trabajador','desembolso-trabajador','documentacion-trabajador','gestion-reclamos','revision-pagos','incidentes','revisiones-asistencia','candidatos-asistencia','aprobacion-desembolsos'].includes(vista)) && !acceso(vista)">
     <h1>{{ cuenta ? 'Acceso restringido' : 'Inicia sesión para continuar' }}</h1>
     <p *ngIf="cuenta">Tu cuenta no tiene acceso a esta sección.</p>
-    <button class="btn" *ngIf="!cuenta" (click)="modal='sesion'">Iniciar sesión</button>
+    <button class="btn" *ngIf="!cuenta" (click)="abrirSesion()">Iniciar sesión</button>
     <button class="btn" *ngIf="cuenta" (click)="navegar(panelPrincipal)">Volver a mi área</button>
   </section>
   <section class="page-shell info-page" *ngIf="vista === 'como'">
@@ -433,9 +433,9 @@
   <button (click)="navegar('solicitud')">Mi solicitud</button>
   <small>Cochabamba, Bolivia</small>
 </footer>
-<div class="modal-backdrop" *ngIf="modal" (click)="modal=''">
-  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" (click)="$event.stopPropagation()" (keydown.escape)="modal=''" tabindex="-1">
-    <button class="close-modal" aria-label="Cerrar" (click)="modal=''">×</button>
+<div class="modal-backdrop" *ngIf="modal" (click)="cerrarModal()">
+  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" (click)="$event.stopPropagation()" (keydown.escape)="cerrarModal()" tabindex="-1">
+    <button class="close-modal" aria-label="Cerrar" type="button" (click)="cerrarModal()">×</button>
     <ng-container *ngIf="modal === 'perfil'">
       <div class="avatar">{{ trabajador.iniciales }}</div>
       <h2 id="modalTitulo">{{ trabajador.nombre }}</h2>
@@ -462,11 +462,12 @@
           <input name="nombre" [(ngModel)]="credenciales.nombre" required maxlength="100" autocomplete="name">
         </label>
         <label *ngIf="modal === 'registro'">¿Cómo usarás Arréglalo Ya?
-          <select name="rol" [(ngModel)]="credenciales.rol" required>
+          <select name="rol" [(ngModel)]="credenciales.rol" (ngModelChange)="cambiarRolRegistro($event)" required>
             <option value="cliente">Necesito un servicio</option>
             <option value="trabajador">Quiero ofrecer mis servicios</option>
           </select>
         </label>
+        <p class="signup-hint" *ngIf="modal === 'registro'">Las cuentas de administrador y superadministrador son habilitadas por la dirección; inicia sesión con el correo asignado.</p>
         <ng-container *ngIf="modal === 'registro' && credenciales.rol === 'trabajador'">
           <label>Zona de atención
             <select name="zonaId" [(ngModel)]="credenciales.zonaId" required>
@@ -474,6 +475,7 @@
               <option *ngFor="let zona of zonasRegistro" [value]="zona.id">{{ zona.nombre }}</option>
             </select>
           </label>
+          <p *ngIf="cargandoZonasRegistro" role="status">Cargando zonas…</p>
           <p *ngIf="errorZonasRegistro" role="alert">{{ errorZonasRegistro }}</p>
           <p class="signup-hint">Después podrás añadir tus servicios y presentar tus documentos para revisión.</p>
         </ng-container>
@@ -484,6 +486,7 @@
           <input type="password" name="contrasena" [(ngModel)]="credenciales.contrasena" required
                  [attr.autocomplete]="modal === 'registro' ? 'new-password' : 'current-password'">
         </label>
+        <p role="status" *ngIf="mensajeCuenta">{{ mensajeCuenta }}</p>
         <p role="alert" *ngIf="errorCuenta">{{ errorCuenta }}</p>
         <button class="btn" type="submit" [disabled]="formCuenta.invalid || guardandoCuenta">
           {{ modal === 'sesion' ? 'Entrar' : 'Crear cuenta' }}

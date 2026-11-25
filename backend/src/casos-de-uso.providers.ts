@@ -38,6 +38,62 @@ import { PostgresInicioComplementoAnticipoRepository } from './INFRASTRUCTURE/po
 import { ComplementoAnticipoService } from './SERVICE/complemento-anticipo.service';
 import { CandidatosAsistenciaService } from './SERVICE/casos-escalados/candidatos-asistencia.service';
 
+import { PostgresUsuariosRepository } from './INFRASTRUCTURE/postgres-usuarios.repository';
+import { UsuariosService } from '././SERVICE/usuarios.service';
+import { UsuariosRepository } from './CORE/usuarios/usuarios.repository';
+import { AutenticacionService } from './SERVICE/usuarios/autenticacion.service';
+
+import { PerfilTrabajadorService } from './SERVICE/perfil-trabajador.service';
+import { PostgresPerfilTrabajadorRepository } from './INFRASTRUCTURE/postgres-perfil-trabajador.repository';
+import { PerfilTrabajadorRepository } from './CORE/perfil-trabajador';
+import { DocumentoVerificacionService } from './SERVICE/documento-verificacion.service';
+import { PostgresDocumentoVerificacionRepository } from './INFRASTRUCTURE/postgres-documento-verificacion.repository';
+import { DocumentoVerificacionRepository } from './CORE/documento-verificacion';
+import { SolicitudDisponibleService } from './SERVICE/solicitud-disponible.service';
+import { PostgresSolicitudDisponibleRepository } from './INFRASTRUCTURE/postgres-solicitud-disponible.repository';
+import { CuentaTrabajadorService } from './SERVICE/cuenta-trabajador.service';
+import { PostgresCuentaTrabajadorRepository } from './INFRASTRUCTURE/postgres-cuenta-trabajador.repository';
+import { CuentaTrabajadorRepository } from './CORE/cuenta-trabajador';
+import { CancelacionTrabajadorService } from './SERVICE/cancelacion-trabajador/cancelacion-trabajador.service';
+import { PostgresCancelacionTrabajadorRepository } from './INFRASTRUCTURE/cancelacion-trabajador/postgres-cancelacion-trabajador.repository';
+import { DocumentacionTrabajadorService } from './SERVICE/documentacion-trabajador/documentacion-trabajador.service';
+import { PostgresDocumentacionTrabajadorRepository } from './INFRASTRUCTURE/documentacion-trabajador/postgres-documentacion-trabajador.repository';
+import { GestionReclamosService } from './SERVICE/gestion-reclamos/gestion-reclamos.service';
+import { PostgresGestionReclamosRepository } from './INFRASTRUCTURE/gestion-reclamos/postgres-gestion-reclamos.repository';
+import { AprobacionDesembolsosService } from './SERVICE/aprobacion-desembolsos/aprobacion-desembolsos.service';
+import { PostgresAprobacionDesembolsosRepository } from './INFRASTRUCTURE/aprobacion-desembolsos/postgres-aprobacion-desembolsos.repository';
+
+import { SolicitudesRepository } from './CORE/solicitudes';
+import { SolicitudesService } from './SERVICE/solicitudes.service';
+import { PostgresSolicitudesRepository } from './INFRASTRUCTURE/postgres-solicitudes.repository';
+
+import { CotizacionesRepository } from './CORE/cotizaciones';
+import { CotizacionesService } from './SERVICE/cotizaciones.service';
+import { PostgresCotizacionesRepository } from './INFRASTRUCTURE/postgres-cotizaciones.repository';
+
+import { ReservaInicialRepository } from './CORE/reserva-inicial';
+import { ReservaInicialService } from './SERVICE/reserva-inicial.service';
+import { PostgresReservaInicialRepository } from './INFRASTRUCTURE/postgres-reserva-inicial.repository';
+
+import { SeleccionTrabajadorRepository } from './CORE/seleccion-trabajador';
+import { SeleccionTrabajadorService } from './SERVICE/seleccion-trabajador.service';
+import { PostgresSeleccionTrabajadorRepository } from './INFRASTRUCTURE/postgres-seleccion-trabajador.repository';
+
+import { SolicitudDesembolsoRepository } from './CORE/solicitud-desembolso';
+import { PostgresSolicitudDesembolsoRepository } from './INFRASTRUCTURE/postgres-solicitud-desembolso.repository';
+
+import { OfertasTrabajadorRepository } from './CORE/ofertas-trabajador';
+import { PostgresOfertasTrabajadorRepository } from './INFRASTRUCTURE/postgres-ofertas-trabajador.repository';
+
+export const usuariosProviders: Provider[] = [
+UsuariosService,
+AutenticacionService,
+{
+  provide: UsuariosRepository,
+  useClass: PostgresUsuariosRepository,
+}
+];
+
 /**
  * Evita repetir provide/useFactory/inject para cada repositorio.
  * No crea nuevos Pool: solamente comparte el ya existente.
@@ -52,8 +108,32 @@ function desdePostgres<T>(token: Type<T>, crear: (pool: Pool) => T): Provider<T>
 
 export const casosDeUsoProviders: Provider[] = [
   // Consulta publica de categorias (contrato CORE + implementacion INFRASTRUCTURE).
+  ...usuariosProviders,
+  SolicitudesService,
+  { provide: SolicitudDesembolsoRepository, useClass: PostgresSolicitudDesembolsoRepository },
+  SeleccionTrabajadorService,
+  { provide: SeleccionTrabajadorRepository, useClass: PostgresSeleccionTrabajadorRepository },
+  CotizacionesService,
+  ReservaInicialService,
+  { provide: ReservaInicialRepository, useClass: PostgresReservaInicialRepository },
+  { provide: CotizacionesRepository, useClass: PostgresCotizacionesRepository },
+  { provide: SolicitudesRepository, useClass: PostgresSolicitudesRepository },
+  PerfilTrabajadorService,
+  { provide: PerfilTrabajadorRepository, useClass: PostgresPerfilTrabajadorRepository },
+  DocumentoVerificacionService,
+  { provide: DocumentoVerificacionRepository, useClass: PostgresDocumentoVerificacionRepository },
+  SolicitudDisponibleService,
+  { provide: OfertasTrabajadorRepository, useClass: PostgresOfertasTrabajadorRepository },
+  PostgresSolicitudDisponibleRepository,
+  CuentaTrabajadorService,
+  { provide: CuentaTrabajadorRepository, useClass: PostgresCuentaTrabajadorRepository },
+  desdePostgres(CancelacionTrabajadorService, (pool) => new CancelacionTrabajadorService(new PostgresCancelacionTrabajadorRepository(pool))),
+  desdePostgres(DocumentacionTrabajadorService, (pool) => new DocumentacionTrabajadorService(new PostgresDocumentacionTrabajadorRepository(pool))),
+  desdePostgres(GestionReclamosService, (pool) => new GestionReclamosService(new PostgresGestionReclamosRepository(pool))),
+  desdePostgres(AprobacionDesembolsosService, (pool) => new AprobacionDesembolsosService(new PostgresAprobacionDesembolsosRepository(pool))),
   CategoriasService,
-  { provide: CategoriasRepository, useClass: PostgresCategoriasRepository },
+  { provide: CategoriasRepository,
+     useClass: PostgresCategoriasRepository },
 
   // Funcionalidades privadas (aun requieren autenticacion real).
   desdePostgres(

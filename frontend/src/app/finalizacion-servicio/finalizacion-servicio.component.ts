@@ -14,6 +14,7 @@ export class FinalizacionServicioComponent {
   @Input() reservaId = '';
   @Input() rol: 'trabajador' | 'cliente' | null = null;
 
+  iniciado = false;
   codigoEmitido = '';
   codigoIngresado = '';
   error = '';
@@ -21,6 +22,15 @@ export class FinalizacionServicioComponent {
   finalizacion: FinalizacionConfirmada | null = null;
 
   constructor(private readonly api: FinalizacionApiService) {}
+
+  iniciar(): void {
+    if (!this.reservaId || this.rol !== 'trabajador' || this.procesando) return;
+    this.error = '';
+    this.procesando = true;
+    this.api.iniciar(this.reservaId)
+      .pipe(finalize(() => { this.procesando = false; }))
+      .subscribe(() => { this.iniciado = true; }, error => this.mostrarError(error));
+  }
 
   emitir(): void {
     if (!this.reservaId || this.rol !== 'trabajador' || this.procesando) {

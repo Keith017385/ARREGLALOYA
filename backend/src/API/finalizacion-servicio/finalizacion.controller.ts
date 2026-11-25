@@ -14,6 +14,8 @@ import {
 import { EmisionCodigoService } from '../../SERVICE/finalizacion-servicio/emision-codigo.service';
 import { FinalizacionService } from '../../SERVICE/finalizacion-servicio/finalizacion.service';
 
+import { PostgresInicioServicioRepository } from '../../INFRASTRUCTURE/finalizacion-servicio/postgres-inicio-servicio.repository';
+
 interface SolicitudConUsuario {
   user?: { usuarioId?: unknown };
 }
@@ -83,7 +85,15 @@ export class FinalizacionController {
   constructor(
     private readonly emision: EmisionCodigoService,
     private readonly finalizacion: FinalizacionService,
+    private readonly inicio: PostgresInicioServicioRepository,
   ) {}
+
+  @Post('inicio')
+  iniciar(@Req() solicitud: SolicitudConUsuario, @Param('reservaId') reservaId: string) {
+    const trabajadorId = leerActor(solicitud);
+    validarReservaId(reservaId);
+    return this.inicio.iniciar(reservaId, trabajadorId);
+  }
 
   @Post('codigos')
   @Header('Cache-Control', 'no-store')

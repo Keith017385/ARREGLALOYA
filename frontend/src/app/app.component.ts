@@ -1,9 +1,20 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { Categoria } from './catalogo/categoria';
 import { TrabajadorDemo } from './trabajadores/trabajador-demo';
 import { CatalogoService } from './catalogo/catalogo.service';
 import { TRABAJADORES_DEMO } from './trabajadores/demostracion';
+interface PerfilCuenta {
+  usuarioId: string;
+  estado: string;
+  roles: string[];
+  nombre: string;
+  telefono: string | null;
+  correoContacto: string | null;
+  direccion: string | null;
+}
+
 @Component({ selector: 'app-root', templateUrl: './app.component.html' })
 export class AppComponent implements OnInit, OnDestroy {
   vista = 'inicio'; q = ''; categorias: Categoria[] = [];
@@ -21,8 +32,75 @@ export class AppComponent implements OnInit, OnDestroy {
   rolFinalizacion: 'cliente' | 'trabajador' = 'cliente';
   propuestaIdConsulta = '';
 
-  constructor(private readonly catalogo: CatalogoService) {}
+  cuenta: PerfilCuenta | null = null;
+  datosPerfil = { nombre: '', telefono: '', correoContacto: '', direccion: '' };
+  credenciales = { nombre: '', identificadorAcceso: '', contrasena: '' };
+  errorCuenta = '';
+  guardandoCuenta = false;
+
+  constructor(private readonly catalogo: CatalogoService, private readonly http: HttpClient) {}
+
+  cargarCuenta(): void {
+    this.http.get<PerfilCuenta>('/api/usuarios/perfil').subscribe(
+      perfil => { this.cuenta = perfil; },
+      () => { this.cuenta = null; }
+    );
+  }
+
+  abrirPerfil(): void {
+    if (!this.cuenta) return;
+    const { nombre, telefono, correoContacto, direccion } = this.cuenta;
+    this.datosPerfil = { nombre, telefono: telefono || '', correoContacto: correoContacto || '', direccion: direccion || '' };
+    this.errorCuenta = '';
+    this.modal = 'editar-perfil';
+  }
+
+  guardarPerfil(): void {
+    this.errorCuenta = '';
+    this.guardandoCuenta = true;
+    this.http.put<PerfilCuenta>('/api/usuarios/perfil', this.datosPerfil).subscribe(
+      perfil => {
+        this.guardandoCuenta = false;
+        this.cuenta = perfil;
+        this.modal = '';
+      },
+      error => {
+        this.guardandoCuenta = false;
+        this.errorCuenta = (error.error && error.error.message) || 'No se pudo guardar el perfil.';
+      }
+    );
+  }
+
+  tieneRol(rol: string): boolean {
+    return !!this.cuenta && this.cuenta.roles.includes(rol);
+  }
+
+  enviarCuenta(): void {
+    const registro = this.modal === 'registro';
+    this.errorCuenta = '';
+    this.guardandoCuenta = true;
+    this.http.post('/api/usuarios/' + (registro ? 'registro' : 'sesion'), this.credenciales).subscribe(
+      () => {
+        this.guardandoCuenta = false;
+        this.credenciales.contrasena = '';
+        this.modal = registro ? 'sesion' : '';
+        if (!registro) { this.cargarCuenta(); }
+      },
+      error => {
+        this.guardandoCuenta = false;
+        this.errorCuenta = (error.error && error.error.message) || 'No se pudo completar la operación.';
+      }
+    );
+  }
+
+  cerrarSesion(): void {
+    this.http.post('/api/usuarios/sesion/cerrar', {}).subscribe(
+      () => { this.cuenta = null; this.navegar('inicio'); },
+      () => { this.errorCuenta = 'No se pudo cerrar la sesión.'; }
+    );
+  }
   ngOnInit(): void {
+    this.cargarCuenta();
     const parametros = new URLSearchParams(window.location.search);
     const casosReserva: Array<[string, string]> = [
       ['reserva', 'pago'],
@@ -30,6 +108,7 @@ export class AppComponent implements OnInit, OnDestroy {
       ['reclamoReserva', 'reclamo'],
       ['asistenciaReserva', 'asistencia'],
       ['cancelarReserva', 'cancelacion'],
+      ['cancelarServicio', 'cancelacion-trabajador'],
       ['modificarReserva', 'modificacion'],
       ['finalizarReserva', 'finalizacion'],
     ];
@@ -61,6 +140,10 @@ export class AppComponent implements OnInit, OnDestroy {
     } else if (parametros.get('candidatosAsistencia') === '1') {
       this.navegar('candidatos-asistencia');
     }
+    const pantallas = ['perfil-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador',
+      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
+    const pantalla = parametros.get('vista');
+    if (pantalla && pantallas.includes(pantalla)) { this.navegar(pantalla); }
     this.cargar();
   }
   abrirOperacion(operacion: string): void {
@@ -96,8 +179,15 @@ export class AppComponent implements OnInit, OnDestroy {
   elegir(categoria: Categoria) { this.seleccion = categoria.nombre; this.navegar('trabajadores'); }
   perfil(trabajador: TrabajadorDemo) { this.trabajador = trabajador; this.modal = 'perfil'; }
   solicitar() {
-    // El acceso a solicitudes se habilitará con autenticación real.
-    this.modal = 'sesion-requerida';
+    if (!this.cuenta) { this.modal = 'sesion-requerida'; return; }
+    this.modal = '';
+    this.tipoOperacion = '';
+    this.navegar('solicitud');
+  }
+
+  get categoriaSeleccionada(): string {
+    const categoria = this.catalogoCompleto.find(item => item.nombre === this.seleccion);
+    return categoria ? categoria.id : '';
   }
   icono(nombre: string) {
     const texto = nombre.toLowerCase();

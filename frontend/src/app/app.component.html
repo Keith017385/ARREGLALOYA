@@ -56,7 +56,11 @@
       <button (click)="navegar('como')" [class.active]="vista === 'como'">¿Cómo funciona?</button>
       <button (click)="navegar('nosotros')" [class.active]="vista === 'nosotros'">Nosotros</button>
     </nav>
-    <div class="account-actions">
+    <div class="account-actions" *ngIf="cuenta">
+      <button class="btn btn-outline small" (click)="navegar('mi-cuenta')">{{ cuenta.nombre }}</button>
+      <button class="btn btn-outline small" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+    <div class="account-actions" *ngIf="!cuenta">
       <button class="btn btn-outline small" (click)="modal='sesion'">Iniciar sesión</button>
       <button class="btn small" (click)="modal='registro'">Registrarse</button>
     </div>
@@ -72,8 +76,12 @@
     <button (click)="navegar('como')">¿Cómo funciona?</button>
     <button (click)="navegar('nosotros')">Nosotros</button>
     <button (click)="navegar('solicitud')">Mi solicitud</button>
-    <button (click)="menuAbierto=false; modal='sesion'">Iniciar sesión</button>
-    <button (click)="menuAbierto=false; modal='registro'">Registrarse</button>
+    <ng-container *ngIf="!cuenta">
+      <button (click)="menuAbierto=false; modal='sesion'">Iniciar sesión</button>
+      <button (click)="menuAbierto=false; modal='registro'">Registrarse</button>
+    </ng-container>
+    <button *ngIf="cuenta" (click)="navegar('mi-cuenta')">Mi cuenta</button>
+    <button *ngIf="cuenta" (click)="cerrarSesion()">Cerrar sesión</button>
   </div>
 </header>
 <main>
@@ -268,12 +276,13 @@
   </section>
   <section class="page-shell" *ngIf="vista === 'solicitud'">
     <h1>Mi solicitud</h1>
-    <div class="empty-state">
+    <app-solicitudes *ngIf="cuenta && !tipoOperacion" [categoriaInicial]="categoriaSeleccionada"></app-solicitudes>
+    <div class="empty-state" *ngIf="!cuenta">
       <h2>Inicia sesión para ver tus solicitudes</h2>
       <button class="btn" (click)="solicitar()">Iniciar sesión</button>
     </div>
     <div class="empty-state" *ngIf="!tipoOperacion">
-      <p>Las operaciones privadas requieren autenticación real. Mientras no se implemente, la API responderá 401.</p>
+      <p>Ingresa el identificador de una reserva para consultar sus operaciones.</p>
       <label for="id-reserva-prueba">ID de reserva para revisar vistas técnicas</label>
       <input id="id-reserva-prueba" type="text" name="idReservaPrueba" [(ngModel)]="reservaIdConsulta">
       <p *ngIf="error" role="alert">{{ error }}</p>
@@ -294,6 +303,7 @@
     <app-calificacion-opinion *ngIf="tipoOperacion === 'calificacion'" [reservaId]="reservaIdOperacion"></app-calificacion-opinion>
     <app-reclamo-formal *ngIf="tipoOperacion === 'reclamo'" [reservaId]="reservaIdOperacion"></app-reclamo-formal>
     <app-declaracion-asistencia *ngIf="tipoOperacion === 'asistencia'" [reservaId]="reservaIdOperacion"></app-declaracion-asistencia>
+    <app-cancelacion-trabajador *ngIf="tipoOperacion === 'cancelacion-trabajador'" [reservaId]="reservaIdOperacion"></app-cancelacion-trabajador>
     <app-cancelacion-cliente *ngIf="tipoOperacion === 'cancelacion'" [reservaId]="reservaIdOperacion"></app-cancelacion-cliente>
   </section>
   <section class="page-shell" *ngIf="vista === 'avisos-cancelacion'"><app-avisos-cancelacion></app-avisos-cancelacion></section>
@@ -302,6 +312,51 @@
   <section class="page-shell" *ngIf="vista === 'revisiones-asistencia'"><app-gestion-revision-asistencia></app-gestion-revision-asistencia></section>
   <section class="page-shell" *ngIf="vista === 'candidatos-asistencia'"><app-candidatos-asistencia></app-candidatos-asistencia></section>
   <section class="page-shell" *ngIf="vista === 'opinion-servicio'"><app-respuesta-opinion [calificacionId]="calificacionIdParaOpinion"></app-respuesta-opinion></section>
+  <section class="page-shell" *ngIf="vista === 'mi-cuenta' && cuenta">
+    <h1>Mi cuenta</h1>
+    <p>{{ cuenta.nombre }}</p>
+    <p *ngIf="cuenta.correoContacto">{{ cuenta.correoContacto }}</p>
+    <p *ngIf="cuenta.telefono">{{ cuenta.telefono }}</p>
+    <p *ngIf="cuenta.estado === 'suspendido_voluntario'">Tu cuenta de trabajador está suspendida.</p>
+    <div class="actions">
+      <button class="btn" *ngIf="cuenta.estado === 'activo'" (click)="abrirPerfil()">Editar perfil</button>
+      <button class="btn btn-outline" *ngIf="tieneRol('cliente') && cuenta.estado === 'activo'" (click)="solicitar()">Mis solicitudes</button>
+      <ng-container *ngIf="tieneRol('trabajador')">
+        <button class="btn btn-outline" *ngIf="cuenta.estado === 'activo'" (click)="navegar('perfil-trabajador')">Perfil y documentos de trabajador</button>
+        <button class="btn btn-outline" *ngIf="cuenta.estado === 'activo'" (click)="navegar('solicitudes-trabajador')">Solicitudes y ofertas</button>
+        <button class="btn btn-outline" (click)="navegar('cuenta-trabajador')">Suspender o reactivar cuenta</button>
+        <button class="btn btn-outline" *ngIf="cuenta.estado === 'activo'" (click)="navegar('desembolso-trabajador')">Solicitar desembolso</button>
+      </ng-container>
+      <ng-container *ngIf="tieneRol('administrador') || tieneRol('superadministrador')">
+        <button class="btn btn-outline" (click)="navegar('documentacion-trabajador')">Revisión de documentos</button>
+        <button class="btn btn-outline" (click)="navegar('gestion-reclamos')">Reclamos</button>
+        <button class="btn btn-outline" (click)="navegar('revision-pagos')">Discrepancias de pago</button>
+        <button class="btn btn-outline" (click)="navegar('incidentes')">Incidentes y sanciones</button>
+        <button class="btn btn-outline" (click)="navegar('aprobacion-desembolsos')">Aprobación de desembolsos</button>
+      </ng-container>
+      <button class="btn btn-outline" *ngIf="tieneRol('superadministrador')" (click)="navegar('revisiones-asistencia')">Casos escalados</button>
+    </div>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'perfil-trabajador' && cuenta">
+    <app-perfil-trabajador [usuarioId]="cuenta.usuarioId"></app-perfil-trabajador>
+    <app-documentos-trabajador [usuarioId]="cuenta.usuarioId"></app-documentos-trabajador>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'solicitudes-trabajador' && cuenta">
+    <app-solicitudes-trabajador [usuarioId]="cuenta.usuarioId"></app-solicitudes-trabajador>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'cuenta-trabajador' && cuenta">
+    <app-cuenta-trabajador [usuarioId]="cuenta.usuarioId" (estadoActualizado)="cargarCuenta()"></app-cuenta-trabajador>
+    <button class="btn" (click)="navegar('desembolso-trabajador')">Solicitar desembolso</button>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'desembolso-trabajador' && cuenta">
+    <app-desembolso-trabajador></app-desembolso-trabajador>
+  </section>
+  <section class="page-shell" *ngIf="vista === 'documentacion-trabajador' && cuenta"><app-documentacion-trabajador></app-documentacion-trabajador></section>
+  <section class="page-shell" *ngIf="vista === 'gestion-reclamos' && cuenta"><app-gestion-reclamos></app-gestion-reclamos></section>
+  <section class="page-shell" *ngIf="vista === 'aprobacion-desembolsos' && cuenta"><app-aprobacion-desembolsos></app-aprobacion-desembolsos></section>
+  <section class="page-shell" *ngIf="!cuenta && ['perfil-trabajador','solicitudes-trabajador','cuenta-trabajador','desembolso-trabajador','documentacion-trabajador','gestion-reclamos','aprobacion-desembolsos'].indexOf(vista) >= 0">
+    <button class="btn" (click)="modal='sesion'">Iniciar sesión</button>
+  </section>
   <section class="page-shell info-page" *ngIf="vista === 'como'">
     <span class="eyebrow">DE LA IDEA AL TRABAJO TERMINADO</span>
     <h1>¿Cómo funciona?</h1>
@@ -349,16 +404,37 @@
       <p class="muted">Perfil de demostración para revisar el diseño.</p>
       <button class="btn" (click)="solicitar()">Solicitar cotización</button>
     </ng-container>
+    <ng-container *ngIf="modal === 'editar-perfil'">
+      <h2 id="modalTitulo">Editar perfil</h2>
+      <form #formPerfil="ngForm" (ngSubmit)="guardarPerfil()">
+        <label>Nombre<input name="nombre" [(ngModel)]="datosPerfil.nombre" required minlength="2" maxlength="100"></label>
+        <label>Teléfono<input name="telefono" type="tel" [(ngModel)]="datosPerfil.telefono" maxlength="30"></label>
+        <label>Correo de contacto<input name="correo" type="email" [(ngModel)]="datosPerfil.correoContacto" maxlength="254"></label>
+        <label>Dirección<input name="direccion" [(ngModel)]="datosPerfil.direccion" maxlength="500"></label>
+        <p *ngIf="errorCuenta" role="alert">{{ errorCuenta }}</p>
+        <button class="btn" type="submit" [disabled]="formPerfil.invalid || guardandoCuenta">Guardar</button>
+      </form>
+    </ng-container>
     <ng-container *ngIf="modal === 'sesion' || modal === 'registro'">
       <h2 id="modalTitulo">{{ modal === 'sesion' ? 'Iniciar sesión' : 'Crear una cuenta' }}</h2>
-      <p>El acceso de clientes y trabajadores se implementará en su caso de uso de autenticación.</p>
-      <p class="muted">Puedes explorar el catálogo real y recorrer los perfiles de demostración.</p>
-      <button class="btn" (click)="modal=''; navegar('servicios')">Explorar servicios</button>
+      <form (ngSubmit)="enviarCuenta()">
+        <label *ngIf="modal === 'registro'">Nombre
+          <input name="nombre" [(ngModel)]="credenciales.nombre" required maxlength="100" autocomplete="name">
+        </label>
+        <label>Correo electrónico
+          <input type="email" name="correo" [(ngModel)]="credenciales.identificadorAcceso" required autocomplete="username">
+        </label>
+        <label>Contraseña
+          <input type="password" name="contrasena" [(ngModel)]="credenciales.contrasena" required
+                 [attr.autocomplete]="modal === 'registro' ? 'new-password' : 'current-password'">
+        </label>
+        <p role="alert" *ngIf="errorCuenta">{{ errorCuenta }}</p>
+        <button class="btn" type="submit" [disabled]="guardandoCuenta">Continuar</button>
+      </form>
     </ng-container>
     <ng-container *ngIf="modal === 'sesion-requerida'">
     <h2 id="modalTitulo">Inicia sesión para solicitar una cotización</h2>
-    <p>El acceso de clientes aún está en desarrollo. Las solicitudes estarán disponibles cuando puedas iniciar sesión.</p>
-    <button class="btn" (click)="modal=''">Volver</button>
+    <button class="btn" (click)="modal='sesion'">Iniciar sesión</button>
   </ng-container>
  </section>
 </div>

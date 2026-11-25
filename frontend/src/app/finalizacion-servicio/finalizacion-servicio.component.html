@@ -2,6 +2,8 @@
   <h2>Finalización del servicio</h2>
 
   <div *ngIf="rol === 'trabajador'">
+    <button *ngIf="!iniciado" class="btn btn-outline" type="button" (click)="iniciar()" [disabled]="procesando">Iniciar servicio</button>
+    <p *ngIf="iniciado" role="status">Servicio en ejecución.</p>
     <p>Genera el código al terminar el trabajo y compártelo con el cliente.</p>
 
     <button class="btn" type="button" (click)="emitir()" [disabled]="procesando">

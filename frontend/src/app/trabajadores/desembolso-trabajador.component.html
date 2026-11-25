@@ -1,0 +1,20 @@
+<h1>Solicitar desembolso</h1>
+<p *ngIf="cargando" role="status">Consultando fondos disponibles…</p>
+<p *ngIf="!cargando && !reservas.length && !error">No tienes reservas con fondo disponible.</p>
+<form #formulario="ngForm" *ngIf="reservas.length" (ngSubmit)="solicitar(archivo)">
+  <label>Reserva
+    <select name="reserva" [(ngModel)]="reservaId" required>
+      <option value="">Seleccionar reserva</option>
+      <option *ngFor="let reserva of reservas" [value]="reserva.id">#{{ reserva.id }} · {{ reserva.disponible }} BOB disponibles</option>
+    </select>
+  </label>
+  <label>Importe en BOB
+    <input name="importe" inputmode="decimal" [(ngModel)]="importe" required>
+  </label>
+  <label>Documento de respaldo (PDF)
+    <input #archivo type="file" accept="application/pdf,.pdf" (change)="elegir($event)" required>
+  </label>
+  <button class="btn" type="submit" [disabled]="formulario.invalid || !documento || enviando">Enviar solicitud</button>
+</form>
+<p *ngIf="error" role="alert">{{ error }}</p>
+<p *ngIf="confirmacion" role="status">{{ confirmacion }}</p>

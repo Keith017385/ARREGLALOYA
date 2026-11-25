@@ -9,7 +9,23 @@ git clone https://github.com/Keith017385/ARREGLALOYA.git
 cd ARREGLALOYA
 ```
 
-La rama predeterminada es `main`. Todas las funciones CU-06, CU-07, CU-08, CU-09, CU-10, CU-11, CU-18, CU-19, CU-20, CU-21 y CU-25 están reunidas en el mismo árbol de código.
+La rama de integración es `integracion/requerimientos-v23`. Las ramas `feature/cu*` contienen los cambios de cada caso sobre sus dependencias.
+
+## Preparar PostgreSQL
+
+En una base de desarrollo vacía, instala primero `01_esquema.sql` y `02_reglas_y_operaciones.sql` del proyecto de base de datos Arréglalo Ya. Luego ejecuta las migraciones del repositorio en el siguiente orden:
+
+- `03_discrepancia_pago_directo.sql`
+- `05_resolucion_discrepancia_pago.sql`
+- `06_auditoria_incidentes_sanciones.sql`
+- `07_gestion_revision_asistencia.sql`
+- `08_seleccion_trabajador.sql`
+- `09_documento_desembolso.sql`
+- `10_historial_perfil.sql`
+- `11_historial_solicitud.sql`
+- `12_sesion_http.sql`
+
+En una base compartida, el propietario debe aplicar solo las migraciones pendientes y otorgar al usuario del backend los permisos de acceso correspondientes. Configura un `SESSION_SECRET` aleatorio de al menos 32 caracteres. Las zonas se cargan por entorno y deben existir para publicar solicitudes. Las cuentas nuevas reciben el rol cliente; la administración de la base debe asignar los demás roles.
 
 ## Ejecutar el backend
 
@@ -42,19 +58,12 @@ Abrir `http://127.0.0.1:4200/`. El proxy `frontend/proxy.conf.json` reenvía las
 
 ## Casos de uso incorporados
 
-| CU | Funcionalidad |
-| --- | --- |
-| 06 | Modificación de precio y decisión del cliente |
-| 07 | Emisión de código y confirmación de finalización |
-| 08 | Pago final y solicitud de revisión |
-| 09 | Calificación y opinión |
-| 10 | Reclamo formal |
-| 11 | Declaración/revisión de asistencia |
-| 18 | Resolución de discrepancias de pago |
-| 19 | Incidentes y sanciones |
-| 20 | Escalamiento de revisiones de asistencia |
-| 21 | Cancelación del cliente y avisos |
-| 25 | Respuesta del trabajador a una opinión |
+- CU-01 a CU-05: cuenta y perfil, solicitud, selección directa, decisión sobre cotizaciones y registro del anticipo pendiente.
+- CU-06 a CU-11: cambio de precio, inicio y finalización, pago final, calificación, reclamo y asistencia.
+- CU-12 a CU-17: perfil y documentos del trabajador, ofertas y visitas, cancelación del trabajador, revisión de documentos y reclamos.
+- CU-18 a CU-25: discrepancias, sanciones, escalamiento de asistencia, cancelación del cliente, solicitud y aprobación de desembolso, suspensión y respuesta a opiniones.
+
+El menú **Mi cuenta** muestra las opciones según los roles de la sesión. Los perfiles seleccionables en CU-03 requieren coincidencia con la zona y todas las categorías de la solicitud y aprobación vigente de carnet y certificado.
 
 Para verificar la interfaz de cada caso de uso se aceptan parámetros de URL:
 - `?modificarReserva=5` (CU-06)
@@ -77,11 +86,10 @@ GitHub Actions ejecuta `npm test` en `backend` (compilación TypeScript y prueba
 
 ## Limitaciones conocidas
 
-- **Autenticación todavía pendiente:** los controladores privados esperan `request.user.usuarioId`, pero el backend no dispone de una estrategia o middleware integrado que lo establezca. Sin sesión auténtica devuelven 401. No se debe simular la identidad del usuario en producción.
-- **Alta, inicio de sesión y creación de solicitudes** aún no están implementados como flujo completo; el catálogo es público.
-- **PostgreSQL no se valida con la CI actual:** los tests son unitarios y requieren pruebas de integración posteriores contra una base de pruebas controlada. Hay dependencias de tablas y vistas que no se crean con los scripts aquí incluidos.
-- Los accesos directos a las pantallas de los CU sirven para revisión técnica mientras se desarrolla navegación basada en sesiones, reservas y roles.
-- La fusión de ramas resuelve conflictos de archivos, pero **no equivale** a certificar un funcionamiento extremo a extremo con usuarios y base real.
+- **Cobro del anticipo (CU-05).** El sistema calcula los importes y registra la reserva pendiente. La integración con un medio de cobro queda pendiente de su elección. PostgreSQL cambia el estado al conciliar una acreditación.
+- **Casos escalados (CU-20).** La implementación cubre revisiones de asistencia. Los demás tipos de escalamiento y sus reglas administrativas quedan pendientes.
+- **Documentación.** CU-13 registra una referencia al documento y CU-16 registra la decisión. Los criterios definitivos de aprobación y subsanación quedan sujetos a la definición del equipo.
+- **Integración.** La suite de CI comprueba compilación y pruebas unitarias. Las operaciones con datos requieren un entorno PostgreSQL con el esquema y las migraciones anteriores.
 
 ## Arquitectura
 

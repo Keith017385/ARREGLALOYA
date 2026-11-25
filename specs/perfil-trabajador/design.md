@@ -1,0 +1,4 @@
+# Diseño del perfil y servicios del trabajador (CU-12)
+Angular 9 presenta el perfil del trabajador y sus categorías de servicio en la carpeta trabajadores, siguiendo la organización por funcionalidad del catálogo. Los datos se cargan por HTTP desde Nest y PostgreSQL. El backend conserva las cuatro capas: API, CORE, INFRASTRUCTURE y SERVICE.
+La API propone GET /api/trabajadores/perfil y PUT /api/trabajadores/perfil para consultar y actualizar el perfil, y GET, POST y DELETE en /api/trabajadores/servicios para las categorías que ofrece el trabajador. El SQL se concentra en el repositorio PostgreSQL. Todas las operaciones requieren una sesión válida.
+Cada modificación del perfil se guarda en un historial con fecha y campos cambiados. Las categorías disponibles provienen del catálogo real.

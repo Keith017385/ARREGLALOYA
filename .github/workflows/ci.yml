@@ -5,6 +5,7 @@ on:
     branches:
       - integration/todos-los-cu-2026-11-23
       - main
+      - refactor/solid-db-unica
   pull_request:
     branches: [main]
 

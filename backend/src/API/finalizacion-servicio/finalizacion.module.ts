@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '../../INFRASTRUCTURE/database.module';
 import { DbService } from '../../INFRASTRUCTURE/db.service';
 import { PostgresEmisionCodigoRepository } from '../../INFRASTRUCTURE/finalizacion-servicio/postgres-emision-codigo.repository';
 import { PostgresFinalizacionRepository } from '../../INFRASTRUCTURE/finalizacion-servicio/postgres-finalizacion.repository';
@@ -8,7 +7,6 @@ import { FinalizacionService } from '../../SERVICE/finalizacion-servicio/finaliz
 import { FinalizacionController } from './finalizacion.controller';
 
 @Module({
-  imports: [DatabaseModule],
   controllers: [FinalizacionController],
   providers: [
     {

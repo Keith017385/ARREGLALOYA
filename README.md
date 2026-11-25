@@ -85,6 +85,11 @@ GitHub Actions ejecuta `npm test` en `backend` (compilación TypeScript y prueba
 
 ## Arquitectura
 
+**¿Por qué aparecen `src` y `dist` y cómo se comparte PostgreSQL?** Consulta [Estructura sencilla para la defensa](docs/ESTRUCTURA_SENCILLA.md).
+
+Para revisar la propuesta de refactorización SOLID sin afectar `main`, abrir la rama [refactor/solid-db-unica](https://github.com/Keith017385/ARREGLALOYA/tree/refactor/solid-db-unica) y leer [la guía para la defensa](docs/GUIA_DEFENSA_SOLID.md) en dicha rama.
+
+
 Consultar [docs/architecture.md](docs/architecture.md), [docs/REQUERIMIENTO_SOLICITUDES.md](docs/REQUERIMIENTO_SOLICITUDES.md) y `specs/`.
 
 Existe una rama de respaldo de `main` anterior a esta integración: `backup/main-pre-integracion-2026-11-23`.

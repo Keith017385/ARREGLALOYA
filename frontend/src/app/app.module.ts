@@ -13,11 +13,10 @@ import { IncidentesSancionesModule } from './incidentes-sanciones/incidentes-san
 import { CandidatosAsistenciaModule } from './casos-escalados/candidatos-asistencia.module';
 import { RespuestaOpinionModule } from './respuesta-opinion/respuesta-opinion.module';
 import { FinalizacionServicioModule } from './finalizacion-servicio/finalizacion-servicio.module';
-import { ModificacionPrecioComponent } from './modificacion-precio/modificacion-precio.component';
 import { ModificacionPrecioConectadaComponent } from './modificacion-precio/modificacion-precio-conectada.component';
 
 @NgModule({
-  declarations: [AppComponent, ModificacionPrecioComponent, ModificacionPrecioConectadaComponent],
+  declarations: [AppComponent, ModificacionPrecioConectadaComponent],
   imports: [
     BrowserModule,
     FormsModule,

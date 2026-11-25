@@ -6,7 +6,7 @@
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PostgresCandidatosAsistenciaRepository } from '../../INFRASTRUCTURE/casos-escalados/postgres-candidatos-asistencia.repository';
+import { CandidatosAsistenciaService } from '../../SERVICE/casos-escalados/candidatos-asistencia.service';
 
 interface SolicitudAutenticada {
   user?: { usuarioId?: unknown };
@@ -14,7 +14,7 @@ interface SolicitudAutenticada {
 
 @Controller('superadministracion/candidatos-escalamiento')
 export class CandidatosAsistenciaController {
-  constructor(private readonly repositorio: PostgresCandidatosAsistenciaRepository) {}
+  constructor(private readonly servicio: CandidatosAsistenciaService) {}
 
   @Get('asistencia')
   @Header('Cache-Control', 'no-store')
@@ -26,7 +26,7 @@ export class CandidatosAsistenciaController {
       throw new UnauthorizedException('Inicia sesion para consultar los candidatos a escalamiento.');
     }
 
-    const candidatos = await this.repositorio.listarVencidos(actorId);
+    const candidatos = await this.servicio.listarVencidos(actorId);
     if (candidatos === null) {
       throw new ForbiddenException('Se requiere un superadministrador activo.');
     }

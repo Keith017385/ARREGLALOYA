@@ -1,14 +1,7 @@
 import type { Pool } from 'pg';
+import type { ComplementoAnticipoPendiente, ConsultaComplementoAnticipoRepository } from '../CORE/complemento-anticipo.repository';
 
-export interface ComplementoAnticipoPendiente {
-  reservaId: string;
-  precioFinal: string;
-  anticipoObjetivo: string;
-  anticipoRecibido: string;
-  complementoPendiente: string;
-}
-
-export class PostgresComplementoAnticipoRepository {
+export class PostgresComplementoAnticipoRepository implements ConsultaComplementoAnticipoRepository {
   constructor(private readonly pool: Pool) {}
 
   async consultar(

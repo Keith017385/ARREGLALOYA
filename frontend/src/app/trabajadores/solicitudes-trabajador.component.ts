@@ -13,6 +13,8 @@ export class SolicitudesTrabajadorComponent implements OnInit {
 
   solicitudes: SolicitudDisponible[] = [];
   ofertas: OfertaTrabajador[] = [];
+  cargandoOfertas = true;
+  falloCargaOfertas = false;
   ofertaEditada = '';
   fecha = '';
   manoObra = '';
@@ -88,9 +90,19 @@ export class SolicitudesTrabajadorComponent implements OnInit {
   }
 
   private cargarOfertas(): void {
+    this.cargandoOfertas = true;
+    this.falloCargaOfertas = false;
+    this.errorOferta = '';
     this.solicitudesService.ofertas(this.usuarioId).subscribe(
-      ofertas => this.ofertas = ofertas,
-      error => this.errorOferta = error.error && error.error.message || 'No se pudieron cargar las ofertas.',
+      ofertas => {
+        this.ofertas = Array.isArray(ofertas) ? ofertas : [];
+        this.cargandoOfertas = false;
+      },
+      error => {
+        this.cargandoOfertas = false;
+        this.falloCargaOfertas = true;
+        this.errorOferta = error.error && error.error.message || 'No se pudieron cargar las ofertas.';
+      },
     );
   }
 

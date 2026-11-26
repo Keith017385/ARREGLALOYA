@@ -36,6 +36,7 @@ cd backend
 cp .env.example .env
 # Editar .env con credenciales propias y conexión PostgreSQL válida.
 npm ci
+npm run build
 npm test
 npm start
 ```
@@ -51,10 +52,13 @@ Angular 9 requiere un Node.js compatible; la CI utiliza Node 14 para compilarlo.
 ```bash
 cd frontend
 npm ci
+npm run build
 npm start
 ```
 
 Abrir `http://127.0.0.1:4200/`. El proxy `frontend/proxy.conf.json` reenvía las solicitudes `/api` al backend local. Ejecutar frontend y backend en dos terminales.
+
+Las credenciales ficticias para probar los cuatro roles y el comando de carga local están en [docs/CUENTAS_DEMO.md](docs/CUENTAS_DEMO.md). El seed solo permite una base PostgreSQL local y requiere habilitarse explícitamente.
 
 ## Casos de uso incorporados
 

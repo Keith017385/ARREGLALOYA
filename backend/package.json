@@ -6,7 +6,8 @@
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "build": "npm run clean && tsc",
     "start": "node dist/main.js",
-    "test": "npm run build && node --test test/*.test.cjs"
+    "test": "npm run build && node --test test/*.test.cjs",
+    "seed:demo": "node scripts/seed-demo.cjs"
   },
   "dependencies": {
     "@nestjs/common": "11.1.6",

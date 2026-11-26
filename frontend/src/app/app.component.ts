@@ -16,7 +16,7 @@ interface PerfilCuenta {
 }
 
 interface ZonaRegistro { id: string; nombre: string; }
-interface SeccionPanel { vista: string; titulo: string; detalle: string; }
+interface SeccionPanel { vista: string; titulo: string; detalle: string; navTitulo?: string; }
 interface EjemploDemo { nombre: string; detalle: string; accion: string; resultado: string; }
 interface CredencialesCuenta {
   nombre: string;
@@ -44,6 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
   propuestaIdConsulta = '';
 
   cuenta: PerfilCuenta | null = null;
+  private destinoInicialEspecifico = false;
   datosPerfil = { nombre: '', telefono: '', correoContacto: '', direccion: '' };
   credenciales: CredencialesCuenta = {
     nombre: '', identificadorAcceso: '', contrasena: '', rol: 'cliente', zonaId: '',
@@ -58,22 +59,22 @@ export class AppComponent implements OnInit, OnDestroy {
   moduloAdministrativo = 'documentacion-trabajador';
   readonly seccionesPorPanel: { [panel: string]: SeccionPanel[] } = {
     'panel-administracion': [
-      { vista: 'documentacion-trabajador', titulo: 'Documentación de trabajadores', detalle: 'Revisa los documentos y registra el resultado.' },
-      { vista: 'gestion-reclamos', titulo: 'Reclamos formales', detalle: 'Analiza los antecedentes y resuelve casos.' },
-      { vista: 'revision-pagos', titulo: 'Discrepancias de pago', detalle: 'Revisa declaraciones de pago en disputa.' },
-      { vista: 'incidentes', titulo: 'Incidentes y sanciones', detalle: 'Registra incidentes confirmados y aplica medidas.' },
-      { vista: 'aprobacion-desembolsos', titulo: 'Aprobación de desembolsos', detalle: 'Consulta respaldos y registra una decisión.' },
+      { vista: 'documentacion-trabajador', titulo: 'Documentación de trabajadores', navTitulo: 'Trabajadores', detalle: 'Revisa los documentos y registra el resultado.' },
+      { vista: 'gestion-reclamos', titulo: 'Reclamos formales', navTitulo: 'Reclamos', detalle: 'Analiza los antecedentes y resuelve casos.' },
+      { vista: 'revision-pagos', titulo: 'Discrepancias de pago', navTitulo: 'Pagos', detalle: 'Revisa declaraciones de pago en disputa.' },
+      { vista: 'incidentes', titulo: 'Incidentes y sanciones', navTitulo: 'Incidentes', detalle: 'Registra incidentes confirmados y aplica medidas.' },
+      { vista: 'aprobacion-desembolsos', titulo: 'Aprobación de desembolsos', navTitulo: 'Desembolsos', detalle: 'Consulta respaldos y registra una decisión.' },
     ],
     'panel-superadministracion': [
-      { vista: 'revisiones-asistencia', titulo: 'Revisión de casos escalados', detalle: 'Resuelve revisiones excepcionales de asistencia.' },
-      { vista: 'candidatos-asistencia', titulo: 'Casos para escalar', detalle: 'Supervisa casos que requieren intervención global.' },
+      { vista: 'revisiones-asistencia', titulo: 'Revisión de casos escalados', navTitulo: 'Revisiones', detalle: 'Resuelve revisiones excepcionales de asistencia.' },
+      { vista: 'candidatos-asistencia', titulo: 'Casos para escalar', navTitulo: 'Escalamientos', detalle: 'Supervisa casos que requieren intervención global.' },
     ],
   };
   readonly seccionesTrabajador: SeccionPanel[] = [
-    { vista: 'solicitudes-trabajador', titulo: 'Solicitudes y ofertas', detalle: 'Encuentra trabajos y envía tus propuestas.' },
-    { vista: 'perfil-trabajador', titulo: 'Perfil y servicios', detalle: 'Administra tu perfil y las categorías que atiendes.' },
-    { vista: 'documentos-trabajador', titulo: 'Mis documentos', detalle: 'Presenta y consulta el estado de tus documentos.' },
-    { vista: 'cuenta-trabajador', titulo: 'Mi cuenta de trabajador', detalle: 'Consulta el estado y administra tu cuenta.' },
+    { vista: 'solicitudes-trabajador', titulo: 'Solicitudes y ofertas', navTitulo: 'Solicitudes', detalle: 'Encuentra trabajos y envía tus propuestas.' },
+    { vista: 'perfil-trabajador', titulo: 'Perfil y servicios', navTitulo: 'Perfil', detalle: 'Administra tu perfil y las categorías que atiendes.' },
+    { vista: 'documentos-trabajador', titulo: 'Mis documentos', navTitulo: 'Documentos', detalle: 'Presenta y consulta el estado de tus documentos.' },
+    { vista: 'cuenta-trabajador', titulo: 'Mi cuenta de trabajador', navTitulo: 'Mi cuenta', detalle: 'Consulta el estado y administra tu cuenta.' },
   ];
   readonly ejemplosDemo: EjemploDemo[] = [
     { nombre: 'Enviar una oferta', detalle: 'El trabajador revisa la solicitud y propone una visita.', accion: 'Simular envío de oferta', resultado: 'La oferta de demostración quedó enviada.' },
@@ -85,9 +86,14 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(private readonly catalogo: CatalogoService, private readonly http: HttpClient) {}
 
-  cargarCuenta(): void {
+  cargarCuenta(abrirAreaInicial = false): void {
     this.http.get<PerfilCuenta>('/api/usuarios/perfil').subscribe(
-      perfil => { this.cuenta = perfil; },
+      perfil => {
+        this.cuenta = perfil;
+        if (abrirAreaInicial && !this.destinoInicialEspecifico) {
+          this.navegar(perfil.estado === 'activo' ? this.panelPrincipal : 'mi-cuenta');
+        }
+      },
       () => { this.cuenta = null; }
     );
   }
@@ -143,7 +149,7 @@ export class AppComponent implements OnInit, OnDestroy {
           return;
         }
         this.modal = '';
-        this.cargarCuenta();
+        this.cargarCuenta(true);
       },
       error => {
         this.guardandoCuenta = false;
@@ -203,13 +209,34 @@ export class AppComponent implements OnInit, OnDestroy {
 
   cerrarSesion(): void {
     this.http.post('/api/usuarios/sesion/cerrar', {}).subscribe(
-      () => { this.cuenta = null; this.navegar('inicio'); },
+      () => { this.cuenta = null; this.destinoInicialEspecifico = false; this.navegar('inicio'); },
       () => { this.errorCuenta = 'No se pudo cerrar la sesión.'; }
     );
   }
+
+  private tieneDestinoInicial(parametros: URLSearchParams): boolean {
+    const clavesReserva = ['reserva', 'calificarReserva', 'reclamoReserva', 'asistenciaReserva',
+      'cancelarReserva', 'cancelarServicio', 'modificarReserva', 'finalizarReserva'];
+    if (clavesReserva.some(clave => {
+      const id = parametros.get(clave);
+      return !!id && /^[1-9][0-9]{0,18}$/.test(id);
+    })) { return true; }
+
+    const opinion = parametros.get('opinionCalificacion');
+    if (opinion && /^[1-9][0-9]{0,18}$/.test(opinion)) { return true; }
+    if (['avisosCancelacion', 'revisionPagos', 'incidentes', 'revisionesAsistencia', 'candidatosAsistencia']
+      .some(clave => parametros.get(clave) === '1')) { return true; }
+
+    const pantallas = ['perfil-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador',
+      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
+    const pantalla = parametros.get('vista');
+    return !!pantalla && pantallas.includes(pantalla);
+  }
+
   ngOnInit(): void {
-    this.cargarCuenta();
     const parametros = new URLSearchParams(window.location.search);
+    this.destinoInicialEspecifico = this.tieneDestinoInicial(parametros);
+    this.cargarCuenta(true);
     const casosReserva: Array<[string, string]> = [
       ['reserva', 'pago'],
       ['calificarReserva', 'calificacion'],

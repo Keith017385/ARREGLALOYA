@@ -1418,6 +1418,21 @@ body, .topbar { background: var(--paper); }
 .nav-shell nav button { min-height: 44px; padding: 8px 14px; border-radius: 999px; }
 .nav-shell nav button.active { background: var(--purple); color: white; }
 .nav-shell nav button.active::after { content: none; }
+.nav-shell nav.role-nav {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-shell nav.role-nav::-webkit-scrollbar { display: none; }
+.nav-shell nav.role-nav button {
+  flex: 0 0 auto;
+  padding-inline: clamp(6px, .55vw, 9px);
+  font-size: 12px;
+}
+
 .mobile-menu svg { width: 22px; height: 22px; }
 .hero {
   max-width: 1186px;

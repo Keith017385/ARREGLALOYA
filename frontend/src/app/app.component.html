@@ -56,12 +56,22 @@
       <button (click)="navegar('como')" [class.active]="vista === 'como'" [attr.aria-current]="vista === 'como' ? 'page' : null">¿Cómo funciona?</button>
       <button (click)="navegar('nosotros')" [class.active]="vista === 'nosotros'" [attr.aria-current]="vista === 'nosotros' ? 'page' : null">Nosotros</button>
     </nav>
-    <nav aria-label="Áreas de trabajo" *ngIf="cuenta">
-      <button *ngIf="tieneRol('cliente') && cuenta.estado === 'activo'" (click)="navegar('servicios')">Servicios</button>
-      <button *ngIf="tieneRol('cliente') && cuenta.estado === 'activo'" (click)="solicitar()">Mis solicitudes</button>
-      <button *ngIf="acceso('panel-trabajador')" (click)="navegar('panel-trabajador')">Trabajador</button>
-      <button *ngIf="acceso('panel-administracion')" (click)="navegar('panel-administracion')">Administración</button>
-      <button *ngIf="acceso('panel-superadministracion')" (click)="navegar('panel-superadministracion')">Superadministración</button>
+    <nav class="role-nav" aria-label="Secciones de tu espacio" *ngIf="cuenta">
+      <ng-container *ngIf="tieneRol('cliente') && cuenta.estado === 'activo'">
+        <button [class.active]="vista === 'inicio'" [attr.aria-current]="vista === 'inicio' ? 'page' : null" (click)="navegar('inicio')">Inicio</button>
+        <button [class.active]="vista === 'servicios' || vista === 'trabajadores'" [attr.aria-current]="vista === 'servicios' || vista === 'trabajadores' ? 'page' : null" (click)="q=''; navegar('servicios'); cargar()">Servicios</button>
+        <button [class.active]="vista === 'solicitud'" [attr.aria-current]="vista === 'solicitud' ? 'page' : null" (click)="solicitar()">Mis solicitudes</button>
+      </ng-container>
+      <ng-container *ngIf="acceso('panel-trabajador')">
+        <button [class.active]="vista === 'panel-trabajador'" [attr.aria-current]="vista === 'panel-trabajador' ? 'page' : null" (click)="navegar('panel-trabajador')">Resumen</button>
+        <button *ngFor="let seccion of seccionesRol" [class.active]="vista === seccion.vista" [attr.aria-current]="vista === seccion.vista ? 'page' : null" (click)="navegar(seccion.vista)">{{ seccion.navTitulo || seccion.titulo }}</button>
+      </ng-container>
+      <ng-container *ngIf="acceso('panel-administracion')">
+        <button *ngFor="let seccion of seccionesPorPanel['panel-administracion']" [class.active]="vista === 'panel-administracion' && moduloAdministrativo === seccion.vista" [attr.aria-current]="vista === 'panel-administracion' && moduloAdministrativo === seccion.vista ? 'page' : null" (click)="navegar(seccion.vista)">{{ seccion.navTitulo || seccion.titulo }}</button>
+      </ng-container>
+      <ng-container *ngIf="acceso('panel-superadministracion')">
+        <button *ngFor="let seccion of seccionesPorPanel['panel-superadministracion']" [class.active]="vista === 'panel-superadministracion' && moduloAdministrativo === seccion.vista" [attr.aria-current]="vista === 'panel-superadministracion' && moduloAdministrativo === seccion.vista ? 'page' : null" (click)="navegar(seccion.vista)">{{ seccion.navTitulo || seccion.titulo }}</button>
+      </ng-container>
     </nav>
     <div class="account-actions" *ngIf="cuenta">
       <button class="btn btn-outline small" (click)="navegar('mi-cuenta')">{{ cuenta.nombre }}</button>
@@ -76,20 +86,33 @@
     </button>
   </div>
   <div class="mobile-links" *ngIf="menuAbierto">
-    <button (click)="navegar('inicio')">Inicio</button>
-    <button (click)="navegar('servicios'); filtrar('')">Servicios</button>
-    <button (click)="navegar('como')">¿Cómo funciona?</button>
-    <button (click)="navegar('nosotros')">Nosotros</button>
-    <button *ngIf="!cuenta || tieneRol('cliente')" (click)="navegar('solicitud')">Mis solicitudes</button>
-    <button *ngIf="acceso('panel-trabajador')" (click)="navegar('panel-trabajador')">Trabajador</button>
-    <button *ngIf="acceso('panel-administracion')" (click)="navegar('panel-administracion')">Administración</button>
-    <button *ngIf="acceso('panel-superadministracion')" (click)="navegar('panel-superadministracion')">Superadministración</button>
     <ng-container *ngIf="!cuenta">
+      <button (click)="navegar('inicio')">Inicio</button>
+      <button (click)="navegar('servicios'); filtrar('')">Servicios</button>
+      <button (click)="navegar('como')">¿Cómo funciona?</button>
+      <button (click)="navegar('nosotros')">Nosotros</button>
       <button (click)="abrirSesion()">Iniciar sesión</button>
       <button (click)="menuAbierto=false; abrirRegistro()">Registrarse</button>
     </ng-container>
-    <button *ngIf="cuenta" (click)="navegar('mi-cuenta')">Mi cuenta</button>
-    <button *ngIf="cuenta" (click)="cerrarSesion()">Cerrar sesión</button>
+    <ng-container *ngIf="cuenta">
+      <ng-container *ngIf="tieneRol('cliente') && cuenta.estado === 'activo'">
+        <button (click)="navegar('inicio')">Inicio</button>
+        <button (click)="q=''; navegar('servicios'); cargar()">Servicios</button>
+        <button (click)="solicitar()">Mis solicitudes</button>
+      </ng-container>
+      <ng-container *ngIf="acceso('panel-trabajador')">
+        <button (click)="navegar('panel-trabajador')">Resumen</button>
+        <button *ngFor="let seccion of seccionesRol" (click)="navegar(seccion.vista)">{{ seccion.navTitulo || seccion.titulo }}</button>
+      </ng-container>
+      <ng-container *ngIf="acceso('panel-administracion')">
+        <button *ngFor="let seccion of seccionesPorPanel['panel-administracion']" (click)="navegar(seccion.vista)">{{ seccion.navTitulo || seccion.titulo }}</button>
+      </ng-container>
+      <ng-container *ngIf="acceso('panel-superadministracion')">
+        <button *ngFor="let seccion of seccionesPorPanel['panel-superadministracion']" (click)="navegar(seccion.vista)">{{ seccion.navTitulo || seccion.titulo }}</button>
+      </ng-container>
+      <button (click)="navegar('mi-cuenta')">Mi perfil</button>
+      <button (click)="cerrarSesion()">Cerrar sesión</button>
+    </ng-container>
   </div>
 </header>
 <main>
@@ -362,7 +385,7 @@
   <section class="page-shell role-panel" *ngIf="cuenta && vista === 'panel-trabajador' && seccionesRol.length">
     <header class="role-heading">
       <div>
-        <span class="workspace-eyebrow">ESPACIO DE TRABAJO · TRABAJADOR</span>
+        <span class="workspace-eyebrow">PANEL DEL TRABAJADOR</span>
         <h1>Solicitudes y trabajos</h1>
         <p>Encuentra oportunidades y organiza cada etapa de tus servicios.</p>
       </div>

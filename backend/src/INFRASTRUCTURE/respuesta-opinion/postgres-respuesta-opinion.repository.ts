@@ -46,6 +46,7 @@ export class PostgresRespuestaOpinionRepository implements RespuestaOpinionRepos
              ), '[]'::jsonb) AS respuestas
       ${calificacionVigente}
       WHERE c.calificacion_id = $1::bigint
+        AND NOT EXISTS (SELECT 1 FROM arreglalo.opinion_invalidada i WHERE i.calificacion_id=c.calificacion_id)
         AND (
           (vc.cliente_id = $2::bigint AND arreglalo.tiene_rol($2::bigint, 'cliente') IS TRUE)
           OR
@@ -66,6 +67,7 @@ export class PostgresRespuestaOpinionRepository implements RespuestaOpinionRepos
              arreglalo.tiene_rol(vc.trabajador_id, 'trabajador') IS TRUE AS "trabajadorActivo"
       ${calificacionVigente}
       WHERE c.calificacion_id = $1::bigint
+        AND NOT EXISTS (SELECT 1 FROM arreglalo.opinion_invalidada i WHERE i.calificacion_id=c.calificacion_id)
       `,
       [calificacionId],
     );
@@ -84,6 +86,7 @@ export class PostgresRespuestaOpinionRepository implements RespuestaOpinionRepos
       SELECT c.calificacion_id, $3::text
       ${calificacionVigente}
       WHERE c.calificacion_id = $1::bigint
+        AND NOT EXISTS (SELECT 1 FROM arreglalo.opinion_invalidada i WHERE i.calificacion_id=c.calificacion_id)
         AND vc.trabajador_id = $2::bigint
         AND arreglalo.tiene_rol($2::bigint, 'trabajador') IS TRUE
         AND vigente.opinion ~ '[^[:space:]]'

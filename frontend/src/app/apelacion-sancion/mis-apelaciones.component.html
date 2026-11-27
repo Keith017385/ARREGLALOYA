@@ -1,0 +1,74 @@
+<section class="appeal-view" aria-labelledby="mis-apelaciones-titulo">
+  <header class="appeal-heading">
+    <div>
+      <span class="appeal-eyebrow">ÁREA DEL TRABAJADOR</span>
+      <h2 id="mis-apelaciones-titulo">Apelaciones de sanciones</h2>
+      <p>Presenta una justificación y adjunta evidencias para que administración revise tu caso.</p>
+    </div>
+    <button class="appeal-button appeal-button-light" type="button" (click)="cargar()" [disabled]="cargando">Actualizar</button>
+  </header>
+
+  <p class="appeal-alert appeal-alert-error" *ngIf="error" role="alert">{{ error }}</p>
+  <p class="appeal-alert appeal-alert-success" *ngIf="mensaje" role="status">{{ mensaje }}</p>
+  <p *ngIf="cargando" role="status">Cargando tus sanciones y apelaciones…</p>
+
+  <div class="appeal-columns">
+    <form class="appeal-card appeal-form" (ngSubmit)="crear()">
+      <div class="appeal-card-heading">
+        <span class="appeal-icon">01</span>
+        <div><h3>Nueva apelación</h3><p>Explica por qué solicitas revisar la sanción.</p></div>
+      </div>
+      <label for="sancion-apelar">Sanción</label>
+      <select id="sancion-apelar" name="sancionId" [(ngModel)]="sancionId" required [disabled]="guardando || cargando">
+        <option value="">Selecciona una sanción propia</option>
+        <option *ngFor="let sancion of sancionesDisponibles" [value]="sancion.sancionId">
+          Sanción #{{ sancion.sancionId }} · {{ sancion.motivo }} · {{ sancion.estadoApelacion ? etiquetaEstado(sancion.estadoApelacion) : 'Sin apelación' }}
+        </option>
+      </select>
+      <p class="appeal-empty" *ngIf="!cargando && sancionesDisponibles.length === 0">No tienes sanciones disponibles para apelar.</p>
+
+      <label for="justificacion-apelacion">Justificación <span>20–3000 caracteres</span></label>
+      <textarea id="justificacion-apelacion" name="justificacion" [(ngModel)]="justificacion"
+        minlength="20" maxlength="3000" rows="5" required [disabled]="guardando"></textarea>
+      <div class="appeal-field-footer"><span>Describe los hechos y por qué pides una revisión.</span><span>{{ justificacion.trim().length }}/3000</span></div>
+
+      <label for="evidencias-apelacion">Evidencias <span>PDF, PNG o JPG · hasta 3 archivos de 5 MB</span></label>
+      <input id="evidencias-apelacion" name="evidencias" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+        (change)="seleccionarArchivos($event)" [disabled]="guardando">
+      <p class="appeal-file-list" *ngIf="archivos.length">{{ archivos.length }} archivo(s) seleccionado(s).</p>
+      <ul class="appeal-files" *ngIf="archivos.length">
+        <li *ngFor="let archivo of archivos">{{ archivo.name }}</li>
+      </ul>
+      <button class="appeal-button" type="submit" [disabled]="guardando || !sancionId || justificacion.trim().length < 20">
+        {{ guardando ? 'Enviando…' : 'Presentar apelación' }}
+      </button>
+    </form>
+
+    <section class="appeal-card appeal-history" aria-labelledby="historial-apelaciones-titulo">
+      <div class="appeal-card-heading">
+        <span class="appeal-icon">02</span>
+        <div><h3 id="historial-apelaciones-titulo">Mis solicitudes</h3><p>Consulta el estado y las decisiones recibidas.</p></div>
+      </div>
+      <p class="appeal-empty" *ngIf="!cargando && apelaciones.length === 0">Todavía no presentaste apelaciones.</p>
+      <article class="appeal-record" *ngFor="let apelacion of apelaciones">
+        <header class="appeal-record-heading">
+          <strong>Apelación #{{ apelacion.apelacionId }}</strong>
+          <span class="appeal-status" [ngClass]="'status-' + apelacion.estado">{{ etiquetaEstado(apelacion.estado) }}</span>
+        </header>
+        <p class="appeal-meta">Sanción #{{ apelacion.sancionId }} · {{ apelacion.solicitadaEn | date:'dd/MM/yyyy HH:mm':'-0400' }}</p>
+        <p>{{ apelacion.justificacion }}</p>
+        <div class="appeal-evidence" *ngIf="apelacion.evidencias.length">
+          <strong>Evidencias</strong>
+          <button class="appeal-link" type="button" *ngFor="let evidencia of apelacion.evidencias" (click)="descargar(apelacion, evidencia)">
+            Descargar {{ evidencia.nombreArchivo }}
+          </button>
+        </div>
+        <div class="appeal-decision" *ngFor="let decision of apelacion.historial">
+          <strong>Decisión: {{ etiquetaEstado(decision.decision) }}</strong>
+          <p>{{ decision.fundamento }}</p>
+          <small>{{ decision.decididaEn | date:'dd/MM/yyyy HH:mm':'-0400' }}</small>
+        </div>
+      </article>
+    </section>
+  </div>
+</section>

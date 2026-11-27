@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { OfertaTrabajador, SolicitudDisponible } from './solicitudes-trabajador';
 import { SolicitudesTrabajadorService } from './solicitudes-trabajador.service';
 
@@ -7,13 +7,13 @@ import { SolicitudesTrabajadorService } from './solicitudes-trabajador.service';
   templateUrl: './solicitudes-trabajador.component.html',
   styleUrls: ['./solicitudes-trabajador.component.css']
 })
-export class SolicitudesTrabajadorComponent implements OnInit {
-
+export class SolicitudesTrabajadorComponent implements OnChanges {
   @Input() usuarioId = '';
 
   solicitudes: SolicitudDisponible[] = [];
   ofertas: OfertaTrabajador[] = [];
-  cargandoOfertas = true;
+  usuarioIdValido = false;
+  cargandoOfertas = false;
   falloCargaOfertas = false;
   ofertaEditada = '';
   fecha = '';
@@ -26,16 +26,24 @@ export class SolicitudesTrabajadorComponent implements OnInit {
   cargando = false;
   error = '';
 
-  constructor(
-    private solicitudesService: SolicitudesTrabajadorService
-  ) {}
+  constructor(private solicitudesService: SolicitudesTrabajadorService) {}
 
-  ngOnInit(): void {
+  ngOnChanges(): void {
+    this.usuarioIdValido = /^[1-9][0-9]{0,18}$/.test(this.usuarioId);
+    if (!this.usuarioIdValido) {
+      this.solicitudes = [];
+      this.ofertas = [];
+      this.cargando = false;
+      this.cargandoOfertas = false;
+      this.falloCargaOfertas = false;
+      return;
+    }
     this.cargarSolicitudes();
     this.cargarOfertas();
   }
 
   cargarSolicitudes(): void {
+    if (!this.usuarioIdValido) return;
     this.cargando = true;
     this.error = '';
 
@@ -89,7 +97,8 @@ export class SolicitudesTrabajadorComponent implements OnInit {
     return null;
   }
 
-  private cargarOfertas(): void {
+  cargarOfertas(): void {
+    if (!this.usuarioIdValido) return;
     this.cargandoOfertas = true;
     this.falloCargaOfertas = false;
     this.errorOferta = '';
@@ -107,6 +116,7 @@ export class SolicitudesTrabajadorComponent implements OnInit {
   }
 
   private enviar(operacion: string, datos: object, aviso: string): void {
+    if (!this.usuarioIdValido) return;
     this.enviando = true;
     this.aviso = '';
     this.errorOferta = '';

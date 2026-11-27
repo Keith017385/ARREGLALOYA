@@ -23,13 +23,17 @@ import { CancelacionTrabajadorModule } from './cancelacion-trabajador/cancelacio
 import { DocumentacionTrabajadorModule } from './documentacion-trabajador/documentacion-trabajador.module';
 import { GestionReclamosModule } from './gestion-reclamos/gestion-reclamos.module';
 import { AprobacionDesembolsosModule } from './aprobacion-desembolsos/aprobacion-desembolsos.module';
+import { ApelacionSancionModule } from './apelacion-sancion/apelacion-sancion.module';
+import { ProcesoAnticipoComponent } from './anticipo/proceso-anticipo.component';
+import { AdministracionAnticiposComponent } from './anticipo/administracion-anticipos.component';
+import { MisAnticiposComponent } from './anticipo/mis-anticipos.component';
 
 import { SolicitudesComponent } from './solicitudes/solicitudes.component';
 
 import { DesembolsoTrabajadorComponent } from './trabajadores/desembolso-trabajador.component';
 
 @NgModule({
-  declarations: [AppComponent, DesembolsoTrabajadorComponent, SolicitudesComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent, SolicitudesTrabajadorComponent, CuentaTrabajadorComponent],
+  declarations: [AppComponent, DesembolsoTrabajadorComponent, SolicitudesComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent, SolicitudesTrabajadorComponent, CuentaTrabajadorComponent, ProcesoAnticipoComponent, AdministracionAnticiposComponent, MisAnticiposComponent],
   imports: [
     BrowserModule,
     FormsModule,
@@ -37,6 +41,7 @@ import { DesembolsoTrabajadorComponent } from './trabajadores/desembolso-trabaja
     DocumentacionTrabajadorModule,
     GestionReclamosModule,
     AprobacionDesembolsosModule,
+    ApelacionSancionModule,
     HttpClientModule,
     FinalizacionServicioModule,
     PagoFinalModule,

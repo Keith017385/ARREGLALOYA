@@ -1,5 +1,10 @@
 <div class="editorial-columns worker-columns">
 
+<p *ngIf="!usuarioIdValido" class="mensaje error" role="alert">
+  No se identificó la cuenta del trabajador. Cierra sesión e inicia nuevamente.
+</p>
+
+<ng-container *ngIf="usuarioIdValido">
 <div class="solicitudes-container">
 
   <div class="encabezado">
@@ -147,5 +152,6 @@
     </ng-container>
   </article>
 </section>
+</ng-container>
 
 </div>

@@ -2,9 +2,16 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { Categoria } from './catalogo/categoria';
-import { TrabajadorDemo } from './trabajadores/trabajador-demo';
 import { CatalogoService } from './catalogo/catalogo.service';
-import { TRABAJADORES_DEMO } from './trabajadores/demostracion';
+
+interface TrabajadorCatalogo {
+  id: string;
+  nombre: string;
+  zonaId: string;
+  zona: string;
+  opiniones: number;
+  puntuacion: string | null;
+}
 interface PerfilCuenta {
   usuarioId: string;
   estado: string;
@@ -31,10 +38,16 @@ export class AppComponent implements OnInit, OnDestroy {
   vista = 'inicio'; q = ''; categorias: Categoria[] = [];
   catalogoCompleto: Categoria[] = [];
   private consulta?: Subscription;
+  private consultaTrabajadores?: Subscription;
   cargando = false; error = ''; filtros = false; categoriaActiva = '';
   seleccion = 'Plomería'; modal = ''; menuAbierto = false;
-  trabajador: TrabajadorDemo = TRABAJADORES_DEMO[0];
-  trabajadores = TRABAJADORES_DEMO;
+  private categoriaIdActiva = '';
+  trabajador: TrabajadorCatalogo = { id: '', nombre: '', zonaId: '', zona: '', opiniones: 0, puntuacion: null };
+  trabajadorElegido: TrabajadorCatalogo | null = null;
+  trabajadores: TrabajadorCatalogo[] = [];
+  trabajadoresCargando = false;
+  errorTrabajadores = '';
+  private solicitudPendienteAcceso = false;
   // Vistas de casos de uso: cada API valida permisos en el servidor.
   tipoOperacion = '';
   reservaIdOperacion = '';
@@ -62,7 +75,9 @@ export class AppComponent implements OnInit, OnDestroy {
       { vista: 'documentacion-trabajador', titulo: 'Documentación de trabajadores', navTitulo: 'Trabajadores', detalle: 'Revisa los documentos y registra el resultado.' },
       { vista: 'gestion-reclamos', titulo: 'Reclamos formales', navTitulo: 'Reclamos', detalle: 'Analiza los antecedentes y resuelve casos.' },
       { vista: 'revision-pagos', titulo: 'Discrepancias de pago', navTitulo: 'Pagos', detalle: 'Revisa declaraciones de pago en disputa.' },
+      { vista: 'verificar-anticipos', titulo: 'Verificar anticipos', navTitulo: 'Anticipos', detalle: 'Verifica transferencias y confirma las reservas.' },
       { vista: 'incidentes', titulo: 'Incidentes y sanciones', navTitulo: 'Incidentes', detalle: 'Registra incidentes confirmados y aplica medidas.' },
+      { vista: 'apelaciones-administracion', titulo: 'Apelaciones de sanciones', navTitulo: 'Apelaciones', detalle: 'Revisa evidencias y registra decisiones fundamentadas.' },
       { vista: 'aprobacion-desembolsos', titulo: 'Aprobación de desembolsos', navTitulo: 'Desembolsos', detalle: 'Consulta respaldos y registra una decisión.' },
     ],
     'panel-superadministracion': [
@@ -74,6 +89,7 @@ export class AppComponent implements OnInit, OnDestroy {
     { vista: 'solicitudes-trabajador', titulo: 'Solicitudes y ofertas', navTitulo: 'Solicitudes', detalle: 'Encuentra trabajos y envía tus propuestas.' },
     { vista: 'perfil-trabajador', titulo: 'Perfil y servicios', navTitulo: 'Perfil', detalle: 'Administra tu perfil y las categorías que atiendes.' },
     { vista: 'documentos-trabajador', titulo: 'Mis documentos', navTitulo: 'Documentos', detalle: 'Presenta y consulta el estado de tus documentos.' },
+    { vista: 'apelaciones-trabajador', titulo: 'Apelar una sanción', navTitulo: 'Apelaciones', detalle: 'Presenta evidencias y consulta el estado de tu apelación.' },
     { vista: 'cuenta-trabajador', titulo: 'Mi cuenta de trabajador', navTitulo: 'Mi cuenta', detalle: 'Consulta el estado y administra tu cuenta.' },
   ];
   readonly ejemplosDemo: EjemploDemo[] = [
@@ -149,7 +165,10 @@ export class AppComponent implements OnInit, OnDestroy {
           return;
         }
         this.modal = '';
-        this.cargarCuenta(true);
+        const continuarSolicitud = this.solicitudPendienteAcceso;
+        this.solicitudPendienteAcceso = false;
+        this.cargarCuenta(!continuarSolicitud);
+        if (continuarSolicitud) { this.navegar('solicitud'); }
       },
       error => {
         this.guardandoCuenta = false;
@@ -228,7 +247,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .some(clave => parametros.get(clave) === '1')) { return true; }
 
     const pantallas = ['perfil-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador',
-      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
+      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos', 'mis-anticipos', 'verificar-anticipos'];
     const pantalla = parametros.get('vista');
     return !!pantalla && pantallas.includes(pantalla);
   }
@@ -276,7 +295,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.navegar('candidatos-asistencia');
     }
     const pantallas = ['perfil-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador',
-      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
+      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos', 'mis-anticipos', 'verificar-anticipos'];
     const pantalla = parametros.get('vista');
     if (pantalla && pantallas.includes(pantalla)) { this.navegar(pantalla); }
     this.cargar();
@@ -291,7 +310,10 @@ export class AppComponent implements OnInit, OnDestroy {
     this.tipoOperacion = operacion;
   }
 
-  ngOnDestroy() { if (this.consulta) { this.consulta.unsubscribe(); } }
+  ngOnDestroy() {
+    if (this.consulta) { this.consulta.unsubscribe(); }
+    if (this.consultaTrabajadores) { this.consultaTrabajadores.unsubscribe(); }
+  }
   cargar() {
     if (this.consulta) { this.consulta.unsubscribe(); }
     const busqueda = this.q.trim();
@@ -325,21 +347,72 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   buscar() { this.categoriaActiva = ''; this.navegar('servicios'); this.cargar(); }
   filtrar(categoria: string) { this.categoriaActiva = categoria; this.q = categoria; this.cargar(); }
-  elegir(categoria: Categoria) { this.seleccion = categoria.nombre; this.navegar('trabajadores'); }
-  perfil(trabajador: TrabajadorDemo) { this.trabajador = trabajador; this.modal = 'perfil'; }
-  solicitar() {
-    if (!this.cuenta) { this.modal = 'sesion-requerida'; return; }
+  elegir(categoria: Categoria) {
+    this.seleccion = categoria.nombre;
+    this.categoriaIdActiva = categoria.id;
+    this.trabajadorElegido = null;
+    this.navegar('trabajadores');
+    this.cargarTrabajadores(categoria.id);
+  }
+
+  cargarTrabajadores(categoriaId = this.categoriaSeleccionada): void {
+    if (!/^[1-9][0-9]{0,18}$/.test(categoriaId)) {
+      this.trabajadores = [];
+      this.errorTrabajadores = 'Selecciona un servicio para buscar trabajadores.';
+      this.trabajadoresCargando = false;
+      return;
+    }
+    if (this.consultaTrabajadores) { this.consultaTrabajadores.unsubscribe(); }
+    this.trabajadoresCargando = true;
+    this.errorTrabajadores = '';
+    this.consultaTrabajadores = this.http.get<TrabajadorCatalogo[]>(
+      '/api/catalogo/trabajadores?categoriaId=' + encodeURIComponent(categoriaId)
+    ).subscribe(
+      datos => {
+        this.trabajadores = Array.isArray(datos) ? datos : [];
+        this.trabajadoresCargando = false;
+      },
+      error => {
+        this.trabajadores = [];
+        this.errorTrabajadores = error.error && error.error.message
+          || 'No pudimos cargar a los trabajadores. Intenta nuevamente.';
+        this.trabajadoresCargando = false;
+      }
+    );
+  }
+
+  iniciales(nombre: string): string {
+    return nombre.trim().split(/\s+/).slice(0, 2).map(parte => parte.charAt(0).toUpperCase()).join('');
+  }
+
+  perfil(trabajador: TrabajadorCatalogo) {
+    this.trabajador = trabajador;
+    this.modal = 'perfil';
+  }
+
+  solicitar(trabajador?: TrabajadorCatalogo) {
+    if (trabajador) { this.trabajadorElegido = trabajador; }
+    if (!this.cuenta) {
+      this.solicitudPendienteAcceso = !!this.trabajadorElegido;
+      this.modal = 'sesion-requerida';
+      return;
+    }
     this.modal = '';
     this.tipoOperacion = '';
     this.navegar('solicitud');
   }
 
+  limpiarTrabajadorElegido(): void {
+    this.trabajadorElegido = null;
+  }
+
   acceso(vista: string): boolean {
     if (!this.cuenta || this.cuenta.estado !== 'activo') { return false; }
-    if (vista === 'panel-trabajador' || ['perfil-trabajador', 'documentos-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador'].includes(vista)) {
+    if (vista === 'mis-anticipos') { return this.tieneRol('cliente'); }
+    if (vista === 'panel-trabajador' || ['perfil-trabajador', 'documentos-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador', 'apelaciones-trabajador'].includes(vista)) {
       return this.tieneRol('trabajador');
     }
-    if (vista === 'panel-administracion' || ['documentacion-trabajador', 'gestion-reclamos', 'revision-pagos', 'incidentes', 'aprobacion-desembolsos'].includes(vista)) {
+    if (vista === 'panel-administracion' || ['documentacion-trabajador', 'gestion-reclamos', 'revision-pagos', 'incidentes', 'aprobacion-desembolsos', 'apelaciones-administracion', 'verificar-anticipos'].includes(vista)) {
       return this.tieneRol('administrador');
     }
     if (vista === 'panel-superadministracion' || ['revisiones-asistencia', 'candidatos-asistencia'].includes(vista)) {
@@ -373,6 +446,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   get categoriaSeleccionada(): string {
+    if (this.categoriaIdActiva) { return this.categoriaIdActiva; }
     const categoria = this.catalogoCompleto.find(item => item.nombre === this.seleccion);
     return categoria ? categoria.id : '';
   }

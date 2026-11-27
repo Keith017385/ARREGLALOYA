@@ -1,0 +1,48 @@
+.appeal-view{color:var(--ink);display:grid;gap:1rem;min-width:0}
+.appeal-heading{align-items:center;display:flex;gap:1rem;justify-content:space-between}
+.appeal-heading h2{color:var(--deep);font-size:clamp(1.5rem,3vw,2rem);margin:.2rem 0 .45rem}
+.appeal-heading p,.appeal-card-heading p{color:var(--muted);margin:0}
+.appeal-eyebrow{color:var(--primary);font-size:.74rem;font-weight:800;letter-spacing:.1em}
+.appeal-columns{align-items:start;display:grid;gap:1.1rem;grid-template-columns:minmax(280px,.85fr) minmax(360px,1.15fr)}
+.appeal-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--elevation-1);min-width:0;padding:1.25rem}
+.appeal-form,.appeal-decision-form{display:grid;gap:.75rem}
+.appeal-card-heading{align-items:center;display:flex;gap:.8rem;margin-bottom:.25rem}
+.appeal-icon{align-items:center;background:var(--primary-container);border-radius:12px;color:var(--deep);display:flex;font-weight:800;height:42px;justify-content:center;width:42px}
+.appeal-card h3{color:var(--deep);font-size:1.15rem;margin:0 0 .25rem}
+.appeal-card label{color:var(--deep);font-size:.9rem;font-weight:700}
+.appeal-card label span{color:var(--muted);display:block;font-size:.78rem;font-weight:400;margin-top:.2rem}
+.appeal-card input,.appeal-card select,.appeal-card textarea{background:#fff;border:1px solid var(--line);border-radius:10px;color:var(--ink);font:inherit;min-height:44px;padding:.7rem;width:100%}
+.appeal-card textarea{resize:vertical}
+.appeal-field-footer{color:var(--muted);display:flex;font-size:.76rem;justify-content:space-between;gap:.6rem}
+.appeal-button{background:var(--primary);border:1px solid var(--primary);border-radius:10px;color:#fff;font-weight:700;min-height:42px;padding:.65rem 1rem}
+.appeal-button:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
+.appeal-button-light{background:var(--surface);color:var(--primary)}
+.appeal-button-danger{background:var(--error-ink);border-color:var(--error-ink)}
+.appeal-empty{background:var(--surface-tint);border-radius:12px;color:var(--muted);padding:1rem}
+.appeal-alert{border-radius:10px;margin:0;padding:.8rem 1rem}
+.appeal-alert-error{background:var(--error-surface);color:var(--error-ink)}
+.appeal-alert-success{background:var(--primary-container);color:var(--deep)}
+.appeal-history{display:grid;gap:.8rem}
+.appeal-record{border-top:1px solid var(--line);padding-top:1rem}
+.appeal-record-heading{align-items:center;display:flex;gap:.7rem;justify-content:space-between}
+.appeal-record-heading strong{color:var(--deep)}
+.appeal-meta,.appeal-admin-meta{color:var(--muted);font-size:.84rem}
+.appeal-status{background:var(--warning-surface);border-radius:999px;color:var(--warning-ink);font-size:.78rem;font-weight:700;padding:.35rem .65rem;white-space:nowrap}
+.status-aprobada{background:var(--primary-container);color:var(--deep)}
+.status-rechazada{background:var(--error-surface);color:var(--error-ink)}
+.appeal-file-list{color:var(--muted);font-size:.85rem;margin:0}
+.appeal-files{color:var(--muted);font-size:.82rem;margin:.1rem 0 .4rem;padding-left:1.2rem}
+.appeal-evidence{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0}
+.appeal-link{background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--deep);cursor:pointer;padding:.5rem .7rem}
+.appeal-link:hover{background:var(--surface-tint)}
+.appeal-decision{background:var(--surface-tint);border-radius:10px;margin-top:.75rem;padding:.8rem}
+.appeal-decision p{margin:.35rem 0}
+.admin-appeal-card{display:grid;gap:1rem;margin-bottom:.9rem}
+.admin-appeal-card h3{margin:.25rem 0 0}
+.appeal-admin-meta{display:flex;flex-wrap:wrap;gap:1rem}
+.appeal-reason{background:var(--paper);border-radius:12px;padding:1rem}
+.appeal-reason h4,.appeal-evidence h4{color:var(--deep);margin:0 0 .45rem}
+.appeal-reason p{margin:0;white-space:pre-wrap}
+.appeal-actions{display:flex;flex-wrap:wrap;gap:.65rem}
+@media(max-width:900px){.appeal-columns{grid-template-columns:1fr}}
+@media(max-width:560px){.appeal-heading{align-items:flex-start;flex-direction:column}.appeal-heading .appeal-button{width:100%}.appeal-card{padding:1rem}.appeal-actions .appeal-button{flex:1}}

@@ -24,8 +24,12 @@ En una base de desarrollo vacía, instala primero `01_esquema.sql` y `02_reglas_
 - `10_historial_perfil.sql`
 - `11_historial_solicitud.sql`
 - `12_sesion_http.sql`
+- `13_apelacion_sancion.sql`
+- `14_proceso_pago_anticipo.sql`
 
 En desarrollo local, las sesiones se guardan en memoria y se reinician al detener el backend. En producción, aplica `12_sesion_http.sql` antes de iniciar el servicio y otorga al usuario del backend permisos sobre esa tabla; configura un `SESSION_SECRET` aleatorio de al menos 32 caracteres. En una base compartida, el propietario debe aplicar solo las migraciones pendientes y otorgar los permisos de acceso correspondientes. Las zonas se cargan por entorno y deben existir para publicar solicitudes. Las cuentas nuevas reciben el rol cliente; la administración de la base debe asignar los demás roles.
+
+Para habilitar el pago manual del anticipo, configura en el `.env` local del backend `ANTICIPO_BANCO`, `ANTICIPO_TITULAR` y `ANTICIPO_CUENTA` con los datos bancarios oficiales del proyecto; `ANTICIPO_QR_URL` es opcional y debe ser HTTPS. Sin esos valores, la pantalla muestra el seguimiento pero bloquea el reporte de pago y advierte al cliente que no transfiera todavía. Administración debe verificar el abono real antes de acreditar el movimiento. Esta versión no procesa cobros automáticamente.
 
 ## Ejecutar el backend
 
@@ -90,7 +94,7 @@ GitHub Actions ejecuta `npm test` en `backend` (compilación TypeScript y prueba
 
 ## Limitaciones conocidas
 
-- **Cobro del anticipo (CU-05).** El sistema calcula los importes y registra la reserva pendiente. La integración con un medio de cobro queda pendiente de su elección. PostgreSQL cambia el estado al conciliar una acreditación.
+- **Cobro del anticipo (CU-05).** Se habilita el reporte de una transferencia manual y su verificación administrativa. La acreditación concilia el movimiento y confirma la reserva en PostgreSQL; no hay una pasarela bancaria automática.
 - **Casos escalados (CU-20).** La implementación cubre revisiones de asistencia. Los demás tipos de escalamiento y sus reglas administrativas quedan pendientes.
 - **Documentación.** CU-13 registra una referencia al documento y CU-16 registra la decisión. Los criterios definitivos de aprobación y subsanación quedan sujetos a la definición del equipo.
 - **Integración.** La suite de CI comprueba compilación y pruebas unitarias. Las operaciones con datos requieren un entorno PostgreSQL con el esquema y las migraciones anteriores.

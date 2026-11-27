@@ -13,6 +13,8 @@ export interface PagoEnDisputa {
   reservaId: string;
   servicio: string;
   importeDeclarado: string;
+  importeEsperado: string | null;
+  diferencia: string | null;
   pendienteDesde: Date;
   declaraciones: DeclaracionDePago[];
 }

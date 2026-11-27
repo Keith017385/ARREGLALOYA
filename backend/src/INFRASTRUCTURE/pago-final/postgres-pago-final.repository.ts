@@ -76,6 +76,10 @@ async function obtenerReserva(
             FROM arreglalo.pago_directo AS p
             WHERE p.reserva_id = vc.reserva_id
               AND p.confirmado_en IS NULL
+              AND NOT EXISTS (
+                  SELECT 1 FROM arreglalo.resolucion_discrepancia_pago AS r
+                  WHERE r.pago_directo_id = p.pago_directo_id
+              )
         ) AS "tienePagoPendiente"
     FROM arreglalo.v_contratacion AS vc
     JOIN arreglalo.v_fondo AS f USING (reserva_id)
@@ -104,8 +108,13 @@ async function buscarPago(
   const { rows: [fila] } = await cliente.query<FilaPago>(
     `
     SELECT ${columnasPago}
-    FROM arreglalo.pago_directo
+    FROM arreglalo.pago_directo AS p
     WHERE reserva_id = $1::bigint AND pago_directo_id = $2::bigint
+      AND NOT EXISTS (
+          SELECT 1 FROM arreglalo.resolucion_discrepancia_pago AS r
+          WHERE r.pago_directo_id = p.pago_directo_id
+            AND r.resultado = 'pago_no_acreditado'
+      )
     `,
     [reservaId, pagoId],
   );
@@ -149,6 +158,10 @@ async function consultarUltimoPago(
           SELECT 1
           FROM arreglalo.discrepancia_pago_directo d
           WHERE d.pago_directo_id = p.pago_directo_id
+        ) OR EXISTS (
+          SELECT 1 FROM arreglalo.v_fondo f
+          WHERE f.reserva_id = p.reserva_id
+            AND p.importe_declarado::numeric <> f.saldo_directo
         ) AS "enRevision",
         EXISTS (
           SELECT 1
@@ -158,6 +171,11 @@ async function consultarUltimoPago(
         ) AS "yaSolicitoRevision"
     FROM arreglalo.pago_directo p
     WHERE p.reserva_id = $1::bigint
+      AND NOT EXISTS (
+          SELECT 1 FROM arreglalo.resolucion_discrepancia_pago AS r
+          WHERE r.pago_directo_id = p.pago_directo_id
+            AND r.resultado = 'pago_no_acreditado'
+      )
     ORDER BY p.declarado_en DESC, p.pago_directo_id DESC
     LIMIT 1
     `,

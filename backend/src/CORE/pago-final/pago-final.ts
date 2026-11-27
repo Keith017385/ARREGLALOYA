@@ -65,7 +65,7 @@ export function validarDeclaracionPagoFinal(
     throw new Error('La reserva no tiene saldo pendiente.');
   }
 
-  if (importeDeclarado !== saldo) {
-    throw new Error('El pago final debe coincidir con el saldo pendiente.');
+  if (!Number.isSafeInteger(importeDeclarado) || importeDeclarado <= 0) {
+    throw new Error('El importe declarado debe ser un entero positivo en centavos.');
   }
 }

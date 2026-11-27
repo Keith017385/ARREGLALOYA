@@ -339,7 +339,7 @@
     <app-cancelacion-cliente *ngIf="tipoOperacion === 'cancelacion'" [reservaId]="reservaIdOperacion"></app-cancelacion-cliente>
   </section>
   <section class="page-shell" *ngIf="vista === 'avisos-cancelacion'"><app-avisos-cancelacion></app-avisos-cancelacion></section>
-  <section class="page-shell" *ngIf="vista === 'opinion-servicio'"><app-respuesta-opinion [calificacionId]="calificacionIdParaOpinion"></app-respuesta-opinion></section>
+  <section class="page-shell" *ngIf="vista === 'opinion-servicio'"><app-respuesta-opinion [calificacionId]="calificacionIdParaOpinion"></app-respuesta-opinion><app-moderacion-opiniones [calificacionId]="calificacionIdParaOpinion"></app-moderacion-opiniones></section>
   <section class="page-shell" *ngIf="vista === 'mi-cuenta' && cuenta">
     <h1>Mi cuenta</h1>
     <p>{{ cuenta.nombre }}</p>
@@ -373,6 +373,7 @@
       </aside>
       <div class="admin-content" [ngSwitch]="moduloAdministrativo">
         <app-documentacion-trabajador *ngSwitchCase="'documentacion-trabajador'"></app-documentacion-trabajador>
+        <app-moderacion-opiniones *ngSwitchCase="'moderacion-opiniones'"></app-moderacion-opiniones>
         <app-gestion-reclamos *ngSwitchCase="'gestion-reclamos'"></app-gestion-reclamos>
         <app-revision-discrepancias-pago *ngSwitchCase="'revision-pagos'"></app-revision-discrepancias-pago>
         <app-incidentes-sanciones *ngSwitchCase="'incidentes'"></app-incidentes-sanciones>

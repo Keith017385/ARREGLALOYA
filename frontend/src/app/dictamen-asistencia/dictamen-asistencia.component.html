@@ -1,0 +1,33 @@
+<section class="page-shell">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">SUPERADMINISTRACIÓN</span>
+      <h1>Discrepancias de asistencia</h1>
+      <p class="muted">Resuelve los casos en que cliente y trabajador no coinciden.</p>
+    </div>
+  </div>
+  <p role="status" *ngIf="cargando">Cargando casos…</p>
+  <p role="alert" *ngIf="error">{{ error }}</p>
+  <p role="status" *ngIf="mensaje">{{ mensaje }}</p>
+  <p class="muted" *ngIf="!cargando && !casos.length">No hay casos abiertos.</p>
+
+  <article *ngFor="let caso of casos">
+    <strong>Caso {{ caso.respuestaId }} · Reserva {{ caso.reservaId }}</strong>
+    <span class="chip">{{ caso.estadoReserva }}</span>
+    <p class="muted">Rechazada el {{ caso.respondidaEn }}</p>
+    <button class="btn btn-outline" type="button" (click)="elegir(caso)">Resolver</button>
+  </article>
+
+  <form *ngIf="elegido" (ngSubmit)="guardar()">
+    <h2>Resolver el caso {{ elegido.respuestaId }}</h2>
+    <p><label>Resultado *<br>
+      <select name="resultado" [(ngModel)]="resultado" required>
+        <option value="">Elige un resultado…</option>
+        <option value="trabajador_asistio">El trabajador sí asistió (la reserva queda finalizada)</option>
+        <option value="trabajador_no_asistio">El trabajador no asistió (la reserva se cancela)</option>
+      </select></label></p>
+    <p><label>Explicación *<br>
+      <textarea name="explicacion" [(ngModel)]="explicacion" maxlength="1900" rows="4" required></textarea></label></p>
+    <button class="btn" type="submit" [disabled]="guardando || !resultado || !explicacion">Registrar resolución</button>
+  </form>
+</section>

@@ -26,11 +26,17 @@ test('permite al cliente declarar el saldo completo de una reserva finalizada', 
   assert.doesNotThrow(() => validarDeclaracionPagoFinal(reserva, '10', 15000));
 });
 
-test('rechaza importes que no coinciden con el saldo vigente', () => {
-  for (const importe of [0, 12000, 16000, 15000.5]) {
+test('permite declarar un importe menor o mayor que el saldo vigente', () => {
+  for (const importe of [12000, 16000]) {
+    assert.doesNotThrow(() => validarDeclaracionPagoFinal(reserva, '10', importe));
+  }
+});
+
+test('rechaza importes que no son enteros positivos en centavos', () => {
+  for (const importe of [0, -100, 15000.5]) {
     assert.throws(
       () => validarDeclaracionPagoFinal(reserva, '10', importe),
-      /debe coincidir con el saldo/,
+      /entero positivo en centavos/,
     );
   }
 });

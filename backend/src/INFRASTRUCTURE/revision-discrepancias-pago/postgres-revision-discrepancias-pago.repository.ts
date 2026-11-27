@@ -56,7 +56,7 @@ export class PostgresRevisionDiscrepanciasPagoRepository
                EXISTS (
                  SELECT 1 FROM arreglalo.discrepancia_pago_directo d
                  WHERE d.pago_directo_id = p.pago_directo_id
-               ) AS "tieneDiscrepancia",
+               ) OR (p.importe_declarado::numeric <> f.saldo_directo) IS TRUE AS "tieneDiscrepancia",
                EXISTS (
                  SELECT 1 FROM arreglalo.resolucion_discrepancia_pago r
                  WHERE r.pago_directo_id = p.pago_directo_id
@@ -162,12 +162,16 @@ export class PostgresRevisionDiscrepanciasPagoRepository
                p.reserva_id::text AS "reservaId",
                s.descripcion AS servicio,
                p.importe_declarado::numeric::text AS "importeDeclarado",
-               d.pendiente_desde AS "pendienteDesde",
-               d.declaraciones
+               f.saldo_directo::text AS "importeEsperado",
+               (p.importe_declarado::numeric - f.saldo_directo)::text AS diferencia,
+               CASE WHEN p.importe_declarado::numeric <> f.saldo_directo
+                 THEN p.declarado_en ELSE d.pendiente_desde END AS "pendienteDesde",
+               COALESCE(d.declaraciones, '[]'::jsonb) AS declaraciones
         FROM arreglalo.pago_directo p
         JOIN arreglalo.v_contratacion vc ON vc.reserva_id = p.reserva_id
         JOIN arreglalo.solicitud s ON s.solicitud_id = vc.solicitud_id
-        JOIN LATERAL (
+        LEFT JOIN arreglalo.v_fondo f ON f.reserva_id = p.reserva_id
+        LEFT JOIN LATERAL (
           SELECT min(dp.solicitada_en) AS pendiente_desde,
                  jsonb_agg(
                    jsonb_build_object(
@@ -181,15 +185,16 @@ export class PostgresRevisionDiscrepanciasPagoRepository
                  ) AS declaraciones
           FROM arreglalo.discrepancia_pago_directo dp
           WHERE dp.pago_directo_id = p.pago_directo_id
-        ) d ON d.pendiente_desde IS NOT NULL
+        ) d ON true
         WHERE permiso.autorizado IS TRUE
           AND p.confirmado_en IS NULL
+          AND (d.pendiente_desde IS NOT NULL OR p.importe_declarado::numeric <> f.saldo_directo)
           AND NOT EXISTS (
             SELECT 1
             FROM arreglalo.resolucion_discrepancia_pago r
             WHERE r.pago_directo_id = p.pago_directo_id
           )
-        ORDER BY d.pendiente_desde, p.pago_directo_id
+        ORDER BY "pendienteDesde", p.pago_directo_id
         LIMIT 50
       ) caso ON true
       WHERE permiso.autorizado IS TRUE

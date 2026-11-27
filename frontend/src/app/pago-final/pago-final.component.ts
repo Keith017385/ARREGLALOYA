@@ -13,7 +13,9 @@ import { PagoDirecto, PagoFinalApiService } from './pago-final-api.service';
       <ng-container *ngIf="pagoActual as pago; else sinPago">
         <p>Importe declarado: {{ pago.importeCentavos / 100 | currency:'BOB':'Bs ' }}</p>
         <p *ngIf="pago.confirmadoEn">Recepción confirmada.</p>
-        <p *ngIf="!pago.confirmadoEn">Pendiente de confirmación del trabajador.</p>
+        <p *ngIf="!pago.confirmadoEn && !enRevision && revisionEnviadaPara !== pago.id">
+          Pendiente de confirmación del trabajador.
+        </p>
         <button class="btn" type="button"
           *ngIf="rol === 'trabajador' && !pago.confirmadoEn && !enRevision && revisionEnviadaPara !== pago.id"
           [disabled]="ocupado" (click)="confirmar()">
@@ -56,9 +58,17 @@ import { PagoDirecto, PagoFinalApiService } from './pago-final-api.service';
         <ng-container *ngIf="rol === 'cliente' && saldoCentavos > 0 && puedeRegistrarPago">
           <p>Saldo pendiente: {{ saldoCentavos / 100 | currency:'BOB':'Bs ' }}</p>
           <p>Después de pagar directamente al trabajador, registra el pago aquí.</p>
-          <button class="btn" type="button" [disabled]="ocupado" (click)="declarar()">
-            Registrar pago realizado
-          </button>
+          <form (submit)="$event.preventDefault(); declarar(importePagado.value)">
+            <label>
+              Importe pagado en Bs
+              <input #importePagado type="text" inputmode="decimal" placeholder="0,00"
+                required [disabled]="ocupado">
+            </label>
+            <p>Si el importe difiere del saldo, el pago pasará a revisión administrativa.</p>
+            <button class="btn" type="submit" [disabled]="ocupado">
+              Registrar pago realizado
+            </button>
+          </form>
         </ng-container>
         <p *ngIf="rol === 'cliente' && saldoCentavos > 0 && !puedeRegistrarPago">
           El pago todavía no está disponible para registro.
@@ -98,12 +108,20 @@ export class PagoFinalComponent implements OnChanges {
     this.error = '';
   }
 
-  declarar(): void {
+  declarar(importeEnBs: string): void {
     if (this.ocupado || this.rol !== 'cliente' || !this.reservaId
         || this.pagoActual || this.saldoCentavos <= 0 || !this.puedeRegistrarPago) {
       return;
     }
-    this.guardar(this.api.declarar(this.reservaId, this.saldoCentavos));
+    const importeCentavos = this.leerImporteCentavos(importeEnBs.trim());
+    if (importeCentavos === null) {
+      return;
+    }
+    if (importeCentavos === 0) {
+      this.error = 'El importe pagado debe ser mayor que cero.';
+      return;
+    }
+    this.guardar(this.api.declarar(this.reservaId, importeCentavos));
   }
 
   confirmar(): void {
@@ -136,16 +154,8 @@ export class PagoFinalComponent implements OnChanges {
     let importeCentavos: number | null = null;
 
     if (importe !== '') {
-      if (!/^\d+(?:[,.]\d{1,2})?$/.test(importe)) {
-        this.error = 'Introduce un importe válido, con hasta dos decimales.';
-        return;
-      }
-
-      const [bolivianos, decimales = ''] = importe.split(/[,.]/);
-      importeCentavos = Number(bolivianos + decimales.padEnd(2, '0'));
-
-      if (!Number.isSafeInteger(importeCentavos)) {
-        this.error = 'El importe supera el máximo admitido.';
+      importeCentavos = this.leerImporteCentavos(importe);
+      if (importeCentavos === null) {
         return;
       }
     }
@@ -176,6 +186,21 @@ export class PagoFinalComponent implements OnChanges {
             : 'No se pudo solicitar la revisión. Intenta de nuevo.';
         },
       );
+  }
+
+  private leerImporteCentavos(importe: string): number | null {
+    if (!/^\d+(?:[,.]\d{1,2})?$/.test(importe)) {
+      this.error = 'Introduce un importe válido, con hasta dos decimales.';
+      return null;
+    }
+
+    const [bolivianos, decimales = ''] = importe.split(/[,.]/);
+    const centavos = Number(bolivianos + decimales.padEnd(2, '0'));
+    if (!Number.isSafeInteger(centavos)) {
+      this.error = 'El importe supera el máximo admitido.';
+      return null;
+    }
+    return centavos;
   }
 
   private guardar(peticion: Observable<PagoDirecto>): void {

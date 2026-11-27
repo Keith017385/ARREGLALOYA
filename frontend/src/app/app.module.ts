@@ -27,10 +27,9 @@ import { AprobacionDesembolsosModule } from './aprobacion-desembolsos/aprobacion
 import { SolicitudesComponent } from './solicitudes/solicitudes.component';
 
 import { DesembolsoTrabajadorComponent } from './trabajadores/desembolso-trabajador.component';
-
+import { DictamenAsistenciaComponent } from './dictamen-asistencia/dictamen-asistencia.component';
 @NgModule({
-  declarations: [AppComponent, DesembolsoTrabajadorComponent, SolicitudesComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent, SolicitudesTrabajadorComponent, CuentaTrabajadorComponent],
-  imports: [
+  declarations: [AppComponent, DesembolsoTrabajadorComponent, SolicitudesComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent, SolicitudesTrabajadorComponent, CuentaTrabajadorComponent, DictamenAsistenciaComponent],  imports: [
     BrowserModule,
     FormsModule,
     CancelacionTrabajadorModule,

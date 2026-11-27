@@ -379,6 +379,7 @@
         <app-aprobacion-desembolsos *ngSwitchCase="'aprobacion-desembolsos'"></app-aprobacion-desembolsos>
         <app-gestion-revision-asistencia *ngSwitchCase="'revisiones-asistencia'"></app-gestion-revision-asistencia>
         <app-candidatos-asistencia *ngSwitchCase="'candidatos-asistencia'"></app-candidatos-asistencia>
+                <app-dictamen-asistencia *ngSwitchCase="'dictamen-asistencia'" [usuarioId]="cuenta ? cuenta.usuarioId : ''"></app-dictamen-asistencia>
       </div>
     </div>
   </section>

@@ -31,7 +31,7 @@ import { CancelacionTrabajadorController } from './API/cancelacion-trabajador/ca
 import { DocumentacionTrabajadorController } from './API/documentacion-trabajador/documentacion-trabajador.controller';
 import { GestionReclamosController } from './API/gestion-reclamos/gestion-reclamos.controller';
 import { AprobacionDesembolsosController } from './API/aprobacion-desembolsos/aprobacion-desembolsos.controller';
-
+import { DictamenAsistenciaController } from './API/dictamen-asistencia.controller';
 import { SolicitudesController } from './API/solicitudes.controller';
 
 import { SolicitudDesembolsoController } from './API/solicitud-desembolso.controller';
@@ -65,6 +65,7 @@ import { SolicitudDesembolsoController } from './API/solicitud-desembolso.contro
     DocumentacionTrabajadorController,
     GestionReclamosController,
     AprobacionDesembolsosController,
+    DictamenAsistenciaController,
   ],
   providers: [...casosDeUsoProviders, PropietarioTrabajadorGuard],
 })

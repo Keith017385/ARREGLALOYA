@@ -84,7 +84,9 @@ import { PostgresSolicitudDesembolsoRepository } from './INFRASTRUCTURE/postgres
 
 import { OfertasTrabajadorRepository } from './CORE/ofertas-trabajador';
 import { PostgresOfertasTrabajadorRepository } from './INFRASTRUCTURE/postgres-ofertas-trabajador.repository';
-
+import { DictamenAsistenciaService } from './SERVICE/dictamen-asistencia.service';
+import { PostgresDictamenAsistenciaRepository } from './INFRASTRUCTURE/postgres-dictamen-asistencia.repository';
+import { DictamenAsistenciaRepository } from './CORE/dictamen-asistencia';
 export const usuariosProviders: Provider[] = [
 UsuariosService,
 AutenticacionService,
@@ -127,6 +129,8 @@ export const casosDeUsoProviders: Provider[] = [
   PostgresSolicitudDisponibleRepository,
   CuentaTrabajadorService,
   { provide: CuentaTrabajadorRepository, useClass: PostgresCuentaTrabajadorRepository },
+    DictamenAsistenciaService,
+  { provide: DictamenAsistenciaRepository, useClass: PostgresDictamenAsistenciaRepository },
   desdePostgres(CancelacionTrabajadorService, (pool) => new CancelacionTrabajadorService(new PostgresCancelacionTrabajadorRepository(pool))),
   desdePostgres(DocumentacionTrabajadorService, (pool) => new DocumentacionTrabajadorService(new PostgresDocumentacionTrabajadorRepository(pool))),
   desdePostgres(GestionReclamosService, (pool) => new GestionReclamosService(new PostgresGestionReclamosRepository(pool))),

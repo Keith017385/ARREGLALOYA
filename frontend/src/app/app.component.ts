@@ -68,6 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
     'panel-superadministracion': [
       { vista: 'revisiones-asistencia', titulo: 'Revisión de casos escalados', navTitulo: 'Revisiones', detalle: 'Resuelve revisiones excepcionales de asistencia.' },
       { vista: 'candidatos-asistencia', titulo: 'Casos para escalar', navTitulo: 'Escalamientos', detalle: 'Supervisa casos que requieren intervención global.' },
+            { vista: 'dictamen-asistencia', titulo: 'Resolución de discrepancias de asistencia', navTitulo: 'Discrepancias', detalle: 'Registra la resolución y actualiza el estado del servicio.' },
     ],
   };
   readonly seccionesTrabajador: SeccionPanel[] = [
@@ -342,8 +343,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (vista === 'panel-administracion' || ['documentacion-trabajador', 'gestion-reclamos', 'revision-pagos', 'incidentes', 'aprobacion-desembolsos'].includes(vista)) {
       return this.tieneRol('administrador');
     }
-    if (vista === 'panel-superadministracion' || ['revisiones-asistencia', 'candidatos-asistencia'].includes(vista)) {
-      return this.tieneRol('superadministrador');
+    if (vista === 'panel-superadministracion' || ['revisiones-asistencia', 'candidatos-asistencia', 'dictamen-asistencia'].includes(vista)) {      return this.tieneRol('superadministrador');
     }
     return false;
   }

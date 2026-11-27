@@ -272,41 +272,54 @@
         <h1>Trabajadores disponibles</h1>
         <p class="muted">{{ seleccion }} · Cochabamba</p>
       </div>
-      <span class="demo-label">Vista de demostración</span>
     </div>
-    <p class="demo-note">Los perfiles son ejemplos del diseño. Su disponibilidad y puntuación son datos de demostración.</p>
+    <p class="demo-note">Se muestran trabajadores activos que ofrecen este servicio y tienen sus documentos de verificación aprobados.</p>
     <div class="workers-layout">
       <div class="worker-list">
+        <p *ngIf="trabajadoresCargando" role="status">Buscando trabajadores verificados…</p>
+        <div class="catalogue-feedback catalogue-error" *ngIf="errorTrabajadores" role="alert">
+          <p>{{ errorTrabajadores }}</p>
+          <button class="btn btn-outline" type="button" (click)="cargarTrabajadores()">Reintentar</button>
+        </div>
         <article class="worker-card" *ngFor="let persona of trabajadores">
-          <div class="avatar">{{ persona.iniciales }}</div>
+          <div class="avatar">{{ iniciales(persona.nombre) }}</div>
           <div class="worker-info">
             <h3>{{ persona.nombre }}</h3>
-            <p>
+            <p *ngIf="persona.puntuacion; else sinOpiniones">
               <span class="rating">★ {{ persona.puntuacion }}</span>
               <span class="muted">({{ persona.opiniones }} reseñas)</span>
             </p>
-            <p>{{ seleccion }} <span class="muted">· {{ persona.zona }}</span>
-            </p>
+            <ng-template #sinOpiniones><p class="muted">Aún no tiene reseñas.</p></ng-template>
+            <p>{{ seleccion }} <span class="muted">· {{ persona.zona }}</span></p>
           </div>
           <div class="worker-actions">
-            <button class="btn btn-outline" (click)="perfil(persona)">Ver perfil</button>
-            <button class="btn" (click)="solicitar()">Solicitar cotización</button>
+            <button class="btn btn-outline" type="button" (click)="perfil(persona)">Ver perfil</button>
+            <button class="btn" type="button" (click)="solicitar(persona)">Solicitar cotización</button>
           </div>
+        </article>
+        <article class="worker-empty" *ngIf="!trabajadoresCargando && !errorTrabajadores && !trabajadores.length">
+          <h2>No hay trabajadores verificados disponibles</h2>
+          <p>Por ahora no encontramos perfiles con este servicio y documentos aprobados. Intenta más tarde o elige otro servicio.</p>
         </article>
       </div>
       <aside class="help-card">
         <span class="large-icon">✧</span>
         <h3>Una buena elección<br>hace la diferencia.</h3>
-        <p>Compara perfiles y prepara los detalles del trabajo que necesitas.</p>
+        <p>Compara perfiles verificados y prepara los detalles del trabajo que necesitas.</p>
         <hr>
         <strong>¿Cómo empezar?</strong>
-        <p>Elige un perfil y recorre el ejemplo de solicitud.</p>
+        <p>Elige un perfil para crear una solicitud vinculada a ese trabajador.</p>
       </aside>
     </div>
   </section>
   <section class="page-shell editorial-page" *ngIf="vista === 'solicitud'">
     <h1>Mis solicitudes</h1>
-    <app-solicitudes *ngIf="cuenta && !tipoOperacion" [categoriaInicial]="categoriaSeleccionada"></app-solicitudes>
+    <app-solicitudes *ngIf="cuenta && !tipoOperacion"
+      [categoriaInicial]="categoriaSeleccionada"
+      [trabajadorInicialId]="trabajadorElegido ? trabajadorElegido.id : ''"
+      [trabajadorInicialNombre]="trabajadorElegido ? trabajadorElegido.nombre : ''"
+      [zonaInicial]="trabajadorElegido ? trabajadorElegido.zonaId : ''"
+      (solicitudCreada)="limpiarTrabajadorElegido()"></app-solicitudes>
     <div class="empty-state" *ngIf="!cuenta">
       <h2>Inicia sesión para ver tus solicitudes</h2>
       <button class="btn" (click)="solicitar()">Iniciar sesión</button>
@@ -377,6 +390,7 @@
         <app-revision-discrepancias-pago *ngSwitchCase="'revision-pagos'"></app-revision-discrepancias-pago>
         <app-incidentes-sanciones *ngSwitchCase="'incidentes'"></app-incidentes-sanciones>
         <app-aprobacion-desembolsos *ngSwitchCase="'aprobacion-desembolsos'"></app-aprobacion-desembolsos>
+        <app-revision-apelaciones *ngSwitchCase="'apelaciones-administracion'"></app-revision-apelaciones>
         <app-gestion-revision-asistencia *ngSwitchCase="'revisiones-asistencia'"></app-gestion-revision-asistencia>
         <app-candidatos-asistencia *ngSwitchCase="'candidatos-asistencia'"></app-candidatos-asistencia>
       </div>
@@ -414,7 +428,8 @@
   <section class="page-shell" *ngIf="vista === 'desembolso-trabajador' && cuenta && acceso(vista)">
     <app-desembolso-trabajador></app-desembolso-trabajador>
   </section>
-  <section class="page-shell" *ngIf="(vista.indexOf('panel-') === 0 || ['perfil-trabajador','documentos-trabajador','solicitudes-trabajador','cuenta-trabajador','desembolso-trabajador','documentacion-trabajador','gestion-reclamos','revision-pagos','incidentes','revisiones-asistencia','candidatos-asistencia','aprobacion-desembolsos'].includes(vista)) && !acceso(vista)">
+  <section class="page-shell" *ngIf="vista === 'apelaciones-trabajador' && cuenta && acceso(vista)"><app-mis-apelaciones></app-mis-apelaciones></section>
+  <section class="page-shell" *ngIf="(vista.indexOf('panel-') === 0 || ['perfil-trabajador','documentos-trabajador','solicitudes-trabajador','cuenta-trabajador','desembolso-trabajador','documentacion-trabajador','gestion-reclamos','revision-pagos','incidentes','revisiones-asistencia','candidatos-asistencia','aprobacion-desembolsos','apelaciones-trabajador','apelaciones-administracion'].includes(vista)) && !acceso(vista)">
     <h1>{{ cuenta ? 'Acceso restringido' : 'Inicia sesión para continuar' }}</h1>
     <p *ngIf="cuenta">Tu cuenta no tiene acceso a esta sección.</p>
     <button class="btn" *ngIf="!cuenta" (click)="abrirSesion()">Iniciar sesión</button>
@@ -460,12 +475,13 @@
   <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" (click)="$event.stopPropagation()" (keydown.escape)="cerrarModal()" tabindex="-1">
     <button class="close-modal" aria-label="Cerrar" type="button" (click)="cerrarModal()">×</button>
     <ng-container *ngIf="modal === 'perfil'">
-      <div class="avatar">{{ trabajador.iniciales }}</div>
+      <div class="avatar">{{ iniciales(trabajador.nombre) }}</div>
       <h2 id="modalTitulo">{{ trabajador.nombre }}</h2>
       <p>{{ seleccion }} · {{ trabajador.zona }}</p>
-      <p class="rating">★ {{ trabajador.puntuacion }} · {{ trabajador.opiniones }} reseñas de ejemplo</p>
-      <p class="muted">Perfil de demostración para revisar el diseño.</p>
-      <button class="btn" (click)="solicitar()">Solicitar cotización</button>
+      <p class="rating" *ngIf="trabajador.puntuacion">★ {{ trabajador.puntuacion }} · {{ trabajador.opiniones }} reseñas</p>
+      <p class="muted" *ngIf="!trabajador.puntuacion">Aún no tiene reseñas publicadas.</p>
+      <p class="muted">Perfil de trabajador registrado con documentación aprobada.</p>
+      <button class="btn" type="button" (click)="solicitar(trabajador)">Solicitar cotización</button>
     </ng-container>
     <ng-container *ngIf="modal === 'editar-perfil'">
       <h2 id="modalTitulo">Editar perfil</h2>

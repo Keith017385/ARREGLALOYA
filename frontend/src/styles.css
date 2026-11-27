@@ -587,7 +587,32 @@ nav button.active:after{
   grid-template-columns:1fr 270px;
   gap:28px;
 }
-.worker-card{
+.catalogue-feedback{
+  padding:18px 20px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--surface);
+  color:var(--muted);
+}
+.catalogue-error{
+  border-color:var(--error-ink);
+  background:var(--error-surface);
+  color:var(--error-ink);
+}
+.worker-empty{
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--surface);
+  box-shadow:var(--elevation-1);
+  color:var(--muted);
+}
+.worker-empty h2{
+  margin:0 0 10px;
+  color:var(--ink);
+  font-size:1.25rem;
+}
+.worker-empty p{margin:0;line-height:1.6}.worker-card{
   border:1px solid var(--line);
   padding:25px;
   border-radius:12px;

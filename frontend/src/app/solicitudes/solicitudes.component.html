@@ -1,4 +1,7 @@
 <h2>Publicar solicitud</h2>
+<div class="mensaje" *ngIf="trabajadorInicialId">
+  Esta solicitud se vinculará con {{ trabajadorInicialNombre }}. Revisa la categoría y la zona antes de publicarla.
+</div>
 <form #formulario="ngForm" (ngSubmit)="publicar()">
   <label>Descripción del trabajo
     <textarea name="descripcion" [(ngModel)]="descripcion" maxlength="2000" required></textarea>
@@ -7,7 +10,7 @@
     <input name="ubicacion" [(ngModel)]="ubicacion" maxlength="500" required>
   </label>
   <label>Zona
-    <select name="zona" [(ngModel)]="zonaId" required>
+    <select name="zona" [(ngModel)]="zonaId" required [disabled]="!!trabajadorInicialId">
       <option value="">Seleccionar</option>
       <option *ngFor="let zona of zonas" [value]="zona.id">{{ zona.nombre }}</option>
     </select>
@@ -16,7 +19,7 @@
   <fieldset *ngFor="let servicio of servicios; index as i">
     <legend>Servicio {{ i + 1 }}</legend>
     <label>Categoría
-      <select [name]="'categoria' + i" [(ngModel)]="servicio.categoriaId" required>
+      <select [name]="'categoria' + i" [(ngModel)]="servicio.categoriaId" required [disabled]="!!trabajadorInicialId">
         <option value="">Seleccionar</option>
         <option *ngFor="let categoria of categorias" [value]="categoria.id">{{ categoria.nombre }}</option>
       </select>
@@ -26,11 +29,14 @@
     </label>
     <button type="button" *ngIf="i === 1" (click)="servicios.pop()">Quitar servicio</button>
   </fieldset>
-  <button type="button" *ngIf="servicios.length < 2" (click)="agregarServicio()">Añadir otro servicio</button>
-  <button class="btn" type="submit" [disabled]="formulario.invalid || enviando">Publicar</button>
+  <button type="button" *ngIf="servicios.length < 2 && !trabajadorInicialId" (click)="agregarServicio()">Añadir otro servicio</button>
+  <button class="btn" type="submit" [disabled]="formulario.invalid || enviando || guardandoSeleccion">
+    {{ enviando || guardandoSeleccion ? 'Publicando solicitud…' : 'Publicar' }}
+  </button>
 </form>
 <p *ngIf="confirmacion" role="status">{{ confirmacion }}</p>
 <p *ngIf="error" role="alert">{{ error }}</p>
+<p *ngIf="errorSeleccion" role="alert">{{ errorSeleccion }}</p>
 <h2>Mis solicitudes</h2>
 <p *ngIf="!solicitudes.length && !error">Todavía no tienes solicitudes.</p>
 <article *ngFor="let solicitud of solicitudes">

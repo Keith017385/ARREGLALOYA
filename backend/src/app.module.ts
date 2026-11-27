@@ -9,6 +9,7 @@ import { PagoFinalModule } from './API/pago-final/pago-final.module';
 import { casosDeUsoProviders } from './casos-de-uso.providers';
 
 import { CategoriasController } from './API/categorias.controller';
+import { CatalogoTrabajadoresController } from './API/catalogo-trabajadores.controller';
 import { ModificacionPrecioController } from './API/modificacion-precio.controller';
 import { ComplementoAnticipoController } from './API/complemento-anticipo.controller';
 import { CalificacionOpinionController } from './API/calificacion-opinion/calificacion-opinion.controller';
@@ -35,12 +36,14 @@ import { AprobacionDesembolsosController } from './API/aprobacion-desembolsos/ap
 import { SolicitudesController } from './API/solicitudes.controller';
 
 import { SolicitudDesembolsoController } from './API/solicitud-desembolso.controller';
+import { ApelacionSancionController } from './API/apelacion-sancion/apelacion-sancion.controller';
 
 @Module({
   // DbService se registra una sola vez en DatabaseModule.
   imports: [DatabaseModule, FinalizacionModule, PagoFinalModule],
   controllers: [
     CategoriasController,
+    CatalogoTrabajadoresController,
     ModificacionPrecioController,
     ComplementoAnticipoController,
     CalificacionOpinionController,
@@ -65,6 +68,7 @@ import { SolicitudDesembolsoController } from './API/solicitud-desembolso.contro
     DocumentacionTrabajadorController,
     GestionReclamosController,
     AprobacionDesembolsosController,
+    ApelacionSancionController,
   ],
   providers: [...casosDeUsoProviders, PropietarioTrabajadorGuard],
 })

@@ -10,6 +10,9 @@ import type { Pool } from 'pg';
 
 import { DbService } from './INFRASTRUCTURE/db.service';
 import { CategoriasRepository } from './CORE/categoria';
+import { CatalogoTrabajadoresRepository } from './CORE/catalogo-trabajadores';
+import { CatalogoTrabajadoresService } from './SERVICE/catalogo-trabajadores.service';
+import { PostgresCatalogoTrabajadoresRepository } from './INFRASTRUCTURE/postgres-catalogo-trabajadores.repository';
 import { PostgresCategoriasRepository } from './INFRASTRUCTURE/postgres-categorias.repository';
 import { CategoriasService } from './SERVICE/categorias.service';
 
@@ -85,6 +88,9 @@ import { PostgresSolicitudDesembolsoRepository } from './INFRASTRUCTURE/postgres
 import { OfertasTrabajadorRepository } from './CORE/ofertas-trabajador';
 import { PostgresOfertasTrabajadorRepository } from './INFRASTRUCTURE/postgres-ofertas-trabajador.repository';
 
+import { ApelacionSancionService } from './SERVICE/apelacion-sancion/apelacion-sancion.service';
+import { PostgresApelacionSancionRepository } from './INFRASTRUCTURE/apelacion-sancion/postgres-apelacion-sancion.repository';
+
 export const usuariosProviders: Provider[] = [
 UsuariosService,
 AutenticacionService,
@@ -134,6 +140,8 @@ export const casosDeUsoProviders: Provider[] = [
   CategoriasService,
   { provide: CategoriasRepository,
      useClass: PostgresCategoriasRepository },
+  CatalogoTrabajadoresService,
+  { provide: CatalogoTrabajadoresRepository, useClass: PostgresCatalogoTrabajadoresRepository },
 
   // Funcionalidades privadas (aun requieren autenticacion real).
   desdePostgres(
@@ -209,4 +217,10 @@ export const casosDeUsoProviders: Provider[] = [
     ) => new ComplementoAnticipoService(consulta, inicio),
     inject: [PostgresComplementoAnticipoRepository, PostgresInicioComplementoAnticipoRepository],
   },
+  desdePostgres(
+  ApelacionSancionService,
+  (pool) => new ApelacionSancionService(
+    new PostgresApelacionSancionRepository(pool),
+  ),
+),
 ];

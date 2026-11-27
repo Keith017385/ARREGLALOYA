@@ -23,6 +23,7 @@ import { CancelacionTrabajadorModule } from './cancelacion-trabajador/cancelacio
 import { DocumentacionTrabajadorModule } from './documentacion-trabajador/documentacion-trabajador.module';
 import { GestionReclamosModule } from './gestion-reclamos/gestion-reclamos.module';
 import { AprobacionDesembolsosModule } from './aprobacion-desembolsos/aprobacion-desembolsos.module';
+import { ApelacionSancionModule } from './apelacion-sancion/apelacion-sancion.module';
 
 import { SolicitudesComponent } from './solicitudes/solicitudes.component';
 
@@ -37,6 +38,7 @@ import { DesembolsoTrabajadorComponent } from './trabajadores/desembolso-trabaja
     DocumentacionTrabajadorModule,
     GestionReclamosModule,
     AprobacionDesembolsosModule,
+    ApelacionSancionModule,
     HttpClientModule,
     FinalizacionServicioModule,
     PagoFinalModule,

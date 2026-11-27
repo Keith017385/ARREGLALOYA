@@ -1,0 +1,48 @@
+<section class="appeal-view" aria-labelledby="revision-apelaciones-titulo">
+  <header class="appeal-heading">
+    <div>
+      <span class="appeal-eyebrow">GESTIÓN ADMINISTRATIVA</span>
+      <h2 id="revision-apelaciones-titulo">Revisión de apelaciones</h2>
+      <p>Evalúa las justificaciones, consulta las evidencias y registra una decisión fundamentada.</p>
+    </div>
+    <button class="appeal-button appeal-button-light" type="button" (click)="cargar()" [disabled]="cargando">Actualizar</button>
+  </header>
+
+  <p class="appeal-alert appeal-alert-error" *ngIf="error" role="alert">{{ error }}</p>
+  <p class="appeal-alert appeal-alert-success" *ngIf="mensaje" role="status">{{ mensaje }}</p>
+  <p *ngIf="cargando" role="status">Cargando apelaciones pendientes…</p>
+  <p class="appeal-empty" *ngIf="!cargando && apelaciones.length === 0">No hay apelaciones pendientes de revisión.</p>
+
+  <article class="appeal-card admin-appeal-card" *ngFor="let apelacion of apelaciones">
+    <header class="appeal-record-heading">
+      <div><span class="appeal-eyebrow">CASO #{{ apelacion.apelacionId }}</span><h3>Revisión de sanción #{{ apelacion.sancionId }}</h3></div>
+      <span class="appeal-status status-pendiente">Pendiente</span>
+    </header>
+    <div class="appeal-admin-meta">
+      <span><strong>Trabajador ID:</strong> {{ apelacion.solicitadaPorId }}</span>
+      <span><strong>Presentada:</strong> {{ apelacion.solicitadaEn | date:'dd/MM/yyyy HH:mm':'-0400' }}</span>
+    </div>
+    <section class="appeal-reason">
+      <h4>Justificación del trabajador</h4>
+      <p>{{ apelacion.justificacion }}</p>
+    </section>
+    <section class="appeal-evidence" *ngIf="apelacion.evidencias.length">
+      <h4>Evidencias adjuntas</h4>
+      <button class="appeal-link" type="button" *ngFor="let evidencia of apelacion.evidencias" (click)="descargar(apelacion, evidencia)">
+        Descargar {{ evidencia.nombreArchivo }}
+      </button>
+    </section>
+    <form class="appeal-decision-form" (ngSubmit)="resolver(apelacion, 'aprobada')">
+      <label [for]="'fundamento-' + apelacion.apelacionId">Fundamento de la decisión <span>10–2000 caracteres</span></label>
+      <textarea [id]="'fundamento-' + apelacion.apelacionId" [name]="'fundamento-' + apelacion.apelacionId"
+        [(ngModel)]="fundamentos[apelacion.apelacionId]" minlength="10" maxlength="2000" rows="3" required
+        [disabled]="resolviendoId === apelacion.apelacionId"></textarea>
+      <div class="appeal-actions">
+        <button class="appeal-button" type="button" (click)="resolver(apelacion, 'aprobada')"
+          [disabled]="resolviendoId === apelacion.apelacionId">Aprobar apelación</button>
+        <button class="appeal-button appeal-button-danger" type="button" (click)="resolver(apelacion, 'rechazada')"
+          [disabled]="resolviendoId === apelacion.apelacionId">Rechazar apelación</button>
+      </div>
+    </form>
+  </article>
+</section>

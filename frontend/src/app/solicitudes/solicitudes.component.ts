@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CatalogoService } from '../catalogo/catalogo.service';
 import { Categoria } from '../catalogo/categoria';
 
@@ -57,6 +57,10 @@ interface EventoSolicitud {
 })
 export class SolicitudesComponent implements OnInit {
   @Input() categoriaInicial = '';
+  @Input() trabajadorInicialId = '';
+  @Input() trabajadorInicialNombre = '';
+  @Input() zonaInicial = '';
+  @Output() solicitudCreada = new EventEmitter<void>();
   categorias: Categoria[] = [];
   zonas: Array<{ id: string; nombre: string }> = [];
   solicitudes: Solicitud[] = [];
@@ -94,9 +98,16 @@ export class SolicitudesComponent implements OnInit {
 
   ngOnInit(): void {
     this.servicios = [{ categoriaId: this.categoriaInicial, descripcion: '' }];
+    this.zonaId = this.zonaInicial;
     this.catalogo.buscar('').subscribe(datos => this.categorias = datos, error => this.mostrarError(error));
     this.http.get<Array<{ id: string; nombre: string }>>('/api/solicitudes/zonas')
-      .subscribe(datos => this.zonas = datos, error => this.mostrarError(error));
+      .subscribe(
+        datos => {
+          this.zonas = datos;
+          if (this.zonaId && !this.zonas.some(zona => zona.id === this.zonaId)) this.zonaId = '';
+        },
+        error => this.mostrarError(error)
+      );
     this.cargar();
   }
 
@@ -107,18 +118,37 @@ export class SolicitudesComponent implements OnInit {
   publicar(): void {
     this.enviando = true;
     this.error = '';
+    this.errorSeleccion = '';
     this.confirmacion = '';
     const { descripcion, ubicacion, zonaId, urgente, servicios } = this;
+    const trabajadorId = this.trabajadorInicialId;
+    const trabajadorNombre = this.trabajadorInicialNombre;
+    const zonaPreseleccionada = this.zonaInicial;
     this.http.post<{ id: string }>('/api/solicitudes', { descripcion, ubicacion, zonaId, urgente, servicios }).subscribe(
       ({ id }) => {
         this.enviando = false;
+        this.solicitudCreada.emit();
         this.descripcion = '';
         this.ubicacion = '';
-        this.zonaId = '';
+        this.zonaId = zonaPreseleccionada;
         this.urgente = false;
         this.servicios = [{ categoriaId: this.categoriaInicial, descripcion: '' }];
         this.confirmacion = 'Solicitud #' + id + ' publicada.';
         this.cargar();
+
+        if (!trabajadorId) return;
+        this.guardandoSeleccion = true;
+        this.http.post('/api/solicitudes/' + id + '/seleccion', { trabajadorId }).subscribe(
+          () => {
+            this.guardandoSeleccion = false;
+            this.confirmacion = 'Solicitud #' + id + ' publicada y vinculada a ' + trabajadorNombre + '.';
+          },
+          error => {
+            this.guardandoSeleccion = false;
+            this.errorSeleccion = error.error && error.error.message
+              || 'La solicitud se publicó, pero el trabajador ya no está disponible. Puedes buscar otro desde Mis solicitudes.';
+          }
+        );
       },
       error => {
         this.enviando = false;

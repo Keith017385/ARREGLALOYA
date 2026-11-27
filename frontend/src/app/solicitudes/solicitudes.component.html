@@ -91,7 +91,7 @@
           <ng-container *ngIf="reservaInicial">
             <p>Precio {{ reservaInicial.precio }} BOB · Anticipo {{ reservaInicial.anticipo }} BOB · Comisión {{ reservaInicial.comision }} BOB</p>
             <p *ngIf="reservaInicial.reservaId">Reserva #{{ reservaInicial.reservaId }} · {{ reservaInicial.estado }}</p>
-            <p *ngIf="reservaInicial.estado === 'pendiente_anticipo'">La confirmación depende de la acreditación del anticipo.</p>
+            <app-proceso-anticipo *ngIf="reservaInicial.reservaId" [reservaId]="reservaInicial.reservaId"></app-proceso-anticipo>
             <form *ngIf="!reservaInicial.reservaId" (ngSubmit)="crearReserva(inicioReserva)">
               <label>Inicio programado
                 <input type="datetime-local" name="inicio" [(ngModel)]="inicioReserva" required>

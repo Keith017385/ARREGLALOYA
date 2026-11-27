@@ -65,11 +65,10 @@ export interface ApelacionSancionRepository {
   apelacionId: string,
   evidenciaId: string,
 ): Promise<DescargarEvidenciaApelacionResultado>;
-
-  listarSancionesPropias(
-    actorId: string,
-  ): Promise<
-    | { estado: 'sin_permiso' }
-    | { estado: 'listadas'; sanciones: SancionPropia[] }
-  >;
+listarSancionesPropias(
+  actorId: string,
+): Promise<
+  | { estado: 'sin_permiso' }
+  | { estado: 'listadas'; sanciones: SancionPropia[] }
+>;
 }

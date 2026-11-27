@@ -75,6 +75,7 @@ export class AppComponent implements OnInit, OnDestroy {
       { vista: 'documentacion-trabajador', titulo: 'Documentación de trabajadores', navTitulo: 'Trabajadores', detalle: 'Revisa los documentos y registra el resultado.' },
       { vista: 'gestion-reclamos', titulo: 'Reclamos formales', navTitulo: 'Reclamos', detalle: 'Analiza los antecedentes y resuelve casos.' },
       { vista: 'revision-pagos', titulo: 'Discrepancias de pago', navTitulo: 'Pagos', detalle: 'Revisa declaraciones de pago en disputa.' },
+      { vista: 'verificar-anticipos', titulo: 'Verificar anticipos', navTitulo: 'Anticipos', detalle: 'Verifica transferencias y confirma las reservas.' },
       { vista: 'incidentes', titulo: 'Incidentes y sanciones', navTitulo: 'Incidentes', detalle: 'Registra incidentes confirmados y aplica medidas.' },
       { vista: 'apelaciones-administracion', titulo: 'Apelaciones de sanciones', navTitulo: 'Apelaciones', detalle: 'Revisa evidencias y registra decisiones fundamentadas.' },
       { vista: 'aprobacion-desembolsos', titulo: 'Aprobación de desembolsos', navTitulo: 'Desembolsos', detalle: 'Consulta respaldos y registra una decisión.' },
@@ -246,7 +247,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .some(clave => parametros.get(clave) === '1')) { return true; }
 
     const pantallas = ['perfil-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador',
-      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
+      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos', 'mis-anticipos', 'verificar-anticipos'];
     const pantalla = parametros.get('vista');
     return !!pantalla && pantallas.includes(pantalla);
   }
@@ -294,7 +295,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.navegar('candidatos-asistencia');
     }
     const pantallas = ['perfil-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador',
-      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
+      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos', 'mis-anticipos', 'verificar-anticipos'];
     const pantalla = parametros.get('vista');
     if (pantalla && pantallas.includes(pantalla)) { this.navegar(pantalla); }
     this.cargar();
@@ -407,10 +408,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
   acceso(vista: string): boolean {
     if (!this.cuenta || this.cuenta.estado !== 'activo') { return false; }
+    if (vista === 'mis-anticipos') { return this.tieneRol('cliente'); }
     if (vista === 'panel-trabajador' || ['perfil-trabajador', 'documentos-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador', 'apelaciones-trabajador'].includes(vista)) {
       return this.tieneRol('trabajador');
     }
-    if (vista === 'panel-administracion' || ['documentacion-trabajador', 'gestion-reclamos', 'revision-pagos', 'incidentes', 'aprobacion-desembolsos', 'apelaciones-administracion'].includes(vista)) {
+    if (vista === 'panel-administracion' || ['documentacion-trabajador', 'gestion-reclamos', 'revision-pagos', 'incidentes', 'aprobacion-desembolsos', 'apelaciones-administracion', 'verificar-anticipos'].includes(vista)) {
       return this.tieneRol('administrador');
     }
     if (vista === 'panel-superadministracion' || ['revisiones-asistencia', 'candidatos-asistencia'].includes(vista)) {

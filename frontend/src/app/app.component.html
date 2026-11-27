@@ -61,6 +61,7 @@
         <button [class.active]="vista === 'inicio'" [attr.aria-current]="vista === 'inicio' ? 'page' : null" (click)="navegar('inicio')">Inicio</button>
         <button [class.active]="vista === 'servicios' || vista === 'trabajadores'" [attr.aria-current]="vista === 'servicios' || vista === 'trabajadores' ? 'page' : null" (click)="q=''; navegar('servicios'); cargar()">Servicios</button>
         <button [class.active]="vista === 'solicitud'" [attr.aria-current]="vista === 'solicitud' ? 'page' : null" (click)="solicitar()">Mis solicitudes</button>
+        <button [class.active]="vista === 'mis-anticipos'" [attr.aria-current]="vista === 'mis-anticipos' ? 'page' : null" (click)="navegar('mis-anticipos')">Mis reservas y pagos</button>
       </ng-container>
       <ng-container *ngIf="acceso('panel-trabajador')">
         <button [class.active]="vista === 'panel-trabajador'" [attr.aria-current]="vista === 'panel-trabajador' ? 'page' : null" (click)="navegar('panel-trabajador')">Resumen</button>
@@ -99,6 +100,7 @@
         <button (click)="navegar('inicio')">Inicio</button>
         <button (click)="q=''; navegar('servicios'); cargar()">Servicios</button>
         <button (click)="solicitar()">Mis solicitudes</button>
+        <button (click)="navegar('mis-anticipos')">Mis reservas y pagos</button>
       </ng-container>
       <ng-container *ngIf="acceso('panel-trabajador')">
         <button (click)="navegar('panel-trabajador')">Resumen</button>
@@ -351,6 +353,9 @@
     <app-cancelacion-trabajador *ngIf="tipoOperacion === 'cancelacion-trabajador'" [reservaId]="reservaIdOperacion"></app-cancelacion-trabajador>
     <app-cancelacion-cliente *ngIf="tipoOperacion === 'cancelacion'" [reservaId]="reservaIdOperacion"></app-cancelacion-cliente>
   </section>
+  <section class="page-shell" *ngIf="vista === 'mis-anticipos' && cuenta && acceso('mis-anticipos')">
+    <app-mis-anticipos></app-mis-anticipos>
+  </section>
   <section class="page-shell" *ngIf="vista === 'avisos-cancelacion'"><app-avisos-cancelacion></app-avisos-cancelacion></section>
   <section class="page-shell" *ngIf="vista === 'opinion-servicio'"><app-respuesta-opinion [calificacionId]="calificacionIdParaOpinion"></app-respuesta-opinion></section>
   <section class="page-shell" *ngIf="vista === 'mi-cuenta' && cuenta">
@@ -388,6 +393,7 @@
         <app-documentacion-trabajador *ngSwitchCase="'documentacion-trabajador'"></app-documentacion-trabajador>
         <app-gestion-reclamos *ngSwitchCase="'gestion-reclamos'"></app-gestion-reclamos>
         <app-revision-discrepancias-pago *ngSwitchCase="'revision-pagos'"></app-revision-discrepancias-pago>
+        <app-administracion-anticipos *ngSwitchCase="'verificar-anticipos'"></app-administracion-anticipos>
         <app-incidentes-sanciones *ngSwitchCase="'incidentes'"></app-incidentes-sanciones>
         <app-aprobacion-desembolsos *ngSwitchCase="'aprobacion-desembolsos'"></app-aprobacion-desembolsos>
         <app-revision-apelaciones *ngSwitchCase="'apelaciones-administracion'"></app-revision-apelaciones>
@@ -429,7 +435,7 @@
     <app-desembolso-trabajador></app-desembolso-trabajador>
   </section>
   <section class="page-shell" *ngIf="vista === 'apelaciones-trabajador' && cuenta && acceso(vista)"><app-mis-apelaciones></app-mis-apelaciones></section>
-  <section class="page-shell" *ngIf="(vista.indexOf('panel-') === 0 || ['perfil-trabajador','documentos-trabajador','solicitudes-trabajador','cuenta-trabajador','desembolso-trabajador','documentacion-trabajador','gestion-reclamos','revision-pagos','incidentes','revisiones-asistencia','candidatos-asistencia','aprobacion-desembolsos','apelaciones-trabajador','apelaciones-administracion'].includes(vista)) && !acceso(vista)">
+  <section class="page-shell" *ngIf="(vista.indexOf('panel-') === 0 || ['perfil-trabajador','documentos-trabajador','solicitudes-trabajador','cuenta-trabajador','desembolso-trabajador','documentacion-trabajador','gestion-reclamos','revision-pagos','incidentes','revisiones-asistencia','candidatos-asistencia','aprobacion-desembolsos','apelaciones-trabajador','apelaciones-administracion','mis-anticipos','verificar-anticipos'].includes(vista)) && !acceso(vista)">
     <h1>{{ cuenta ? 'Acceso restringido' : 'Inicia sesión para continuar' }}</h1>
     <p *ngIf="cuenta">Tu cuenta no tiene acceso a esta sección.</p>
     <button class="btn" *ngIf="!cuenta" (click)="abrirSesion()">Iniciar sesión</button>

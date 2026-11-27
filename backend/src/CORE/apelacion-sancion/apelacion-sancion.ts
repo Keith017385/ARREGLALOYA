@@ -30,7 +30,6 @@ export interface ApelacionSancion {
   evidencias: EvidenciaApelacion[];
   historial: HistorialDecisionApelacion[];
 }
-
 export interface SancionPropia {
   sancionId: string;
   motivo: string;

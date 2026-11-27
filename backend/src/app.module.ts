@@ -36,6 +36,7 @@ import { AprobacionDesembolsosController } from './API/aprobacion-desembolsos/ap
 import { SolicitudesController } from './API/solicitudes.controller';
 
 import { SolicitudDesembolsoController } from './API/solicitud-desembolso.controller';
+import { AnticipoController } from './API/anticipo.controller';
 import { ApelacionSancionController } from './API/apelacion-sancion/apelacion-sancion.controller';
 
 @Module({
@@ -69,6 +70,7 @@ import { ApelacionSancionController } from './API/apelacion-sancion/apelacion-sa
     GestionReclamosController,
     AprobacionDesembolsosController,
     ApelacionSancionController,
+    AnticipoController,
   ],
   providers: [...casosDeUsoProviders, PropietarioTrabajadorGuard],
 })

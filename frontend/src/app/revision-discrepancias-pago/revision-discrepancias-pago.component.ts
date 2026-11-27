@@ -16,6 +16,8 @@ interface PagoEnDisputa {
   reservaId: string;
   servicio: string;
   importeDeclarado: string;
+  importeEsperado: string | null;
+  diferencia: string | null;
   pendienteDesde: string;
   declaraciones: DeclaracionDePago[];
 }
@@ -44,11 +46,16 @@ interface ResolucionRegistrada {
       <article *ngFor="let caso of lista">
         <h2>Pago #{{ caso.pagoId }} · Reserva #{{ caso.reservaId }}</h2>
         <p>{{ caso.servicio }}</p>
-        <p>Importe declarado: Bs {{ caso.importeDeclarado }}</p>
+        <p>Importe declarado: {{ caso.importeDeclarado | currency:'BOB':'Bs ' }}</p>
+        <ng-container *ngIf="caso.importeEsperado !== null">
+          <p>Importe esperado: {{ caso.importeEsperado | currency:'BOB':'Bs ' }}</p>
+          <p>Diferencia (declarado menos esperado): {{ caso.diferencia | currency:'BOB':'Bs ' }}</p>
+        </ng-container>
         <p>Pendiente desde {{ caso.pendienteDesde | date:'dd/MM/yyyy HH:mm':'-0400' }}</p>
 
-        <h3>Declaraciones</h3>
-        <ul>
+        <p *ngIf="caso.declaraciones.length === 0">Diferencia detectada automáticamente.</p>
+        <h3 *ngIf="caso.declaraciones.length">Declaraciones</h3>
+        <ul *ngIf="caso.declaraciones.length">
           <li *ngFor="let declaracion of caso.declaraciones">
             <strong>Solicitante #{{ declaracion.solicitanteId }}</strong>
             <time [attr.datetime]="declaracion.solicitadaEn">
@@ -67,10 +74,11 @@ interface ResolucionRegistrada {
               Resultado
               <select #resultado required>
                 <option value="">Selecciona un resultado</option>
-                <option value="pago_acreditado">Pago acreditado</option>
+                <option value="pago_acreditado" [disabled]="!coincidenImportes(caso)">Pago acreditado</option>
                 <option value="pago_no_acreditado">Pago no acreditado</option>
               </select>
             </label>
+            <p *ngIf="!coincidenImportes(caso)">Solo se puede acreditar un pago que coincida con el saldo esperado.</p>
             <label>
               Motivo de la decisión
               <textarea #motivo rows="3" required maxlength="2000"></textarea>
@@ -119,6 +127,10 @@ export class RevisionDiscrepanciasPagoComponent implements OnInit, OnDestroy {
     this.envio.unsubscribe();
   }
 
+  coincidenImportes(caso: PagoEnDisputa): boolean {
+    return caso.diferencia !== null && Number(caso.diferencia) === 0;
+  }
+
   guardarResolucion(caso: PagoEnDisputa, resultado: string, motivo: string): void {
     if (this.cargando || this.pagoGuardando !== null || this.requiereActualizar) {
       return;
@@ -126,6 +138,11 @@ export class RevisionDiscrepanciasPagoComponent implements OnInit, OnDestroy {
 
     if (resultado !== 'pago_acreditado' && resultado !== 'pago_no_acreditado') {
       this.error = 'Selecciona un resultado para la resolución.';
+      return;
+    }
+
+    if (resultado === 'pago_acreditado' && !this.coincidenImportes(caso)) {
+      this.error = 'El importe declarado debe coincidir con el saldo esperado para acreditar el pago.';
       return;
     }
 

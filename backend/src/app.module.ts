@@ -1,3 +1,5 @@
+import { ModeracionOpinionesController } from './API/moderacion-opiniones.controller';
+import { ModeracionOpinionesService } from './SERVICE/moderacion-opiniones.service';
 /**
  * Raiz de NestJS: coordina modulos y controllers, no implementa reglas de negocio.
  */
@@ -39,7 +41,7 @@ import { SolicitudDesembolsoController } from './API/solicitud-desembolso.contro
 @Module({
   // DbService se registra una sola vez en DatabaseModule.
   imports: [DatabaseModule, FinalizacionModule, PagoFinalModule],
-  controllers: [
+  controllers: [ModeracionOpinionesController,
     CategoriasController,
     ModificacionPrecioController,
     ComplementoAnticipoController,
@@ -66,6 +68,6 @@ import { SolicitudDesembolsoController } from './API/solicitud-desembolso.contro
     GestionReclamosController,
     AprobacionDesembolsosController,
   ],
-  providers: [...casosDeUsoProviders, PropietarioTrabajadorGuard],
+  providers: [ModeracionOpinionesService, ...casosDeUsoProviders, PropietarioTrabajadorGuard],
 })
 export class AppModule {}

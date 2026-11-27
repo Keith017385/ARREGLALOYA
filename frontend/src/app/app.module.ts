@@ -1,3 +1,4 @@
+import { ModeracionOpinionesComponent } from './moderacion-opiniones.component';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -29,7 +30,7 @@ import { SolicitudesComponent } from './solicitudes/solicitudes.component';
 import { DesembolsoTrabajadorComponent } from './trabajadores/desembolso-trabajador.component';
 
 @NgModule({
-  declarations: [AppComponent, DesembolsoTrabajadorComponent, SolicitudesComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent, SolicitudesTrabajadorComponent, CuentaTrabajadorComponent],
+  declarations: [ModeracionOpinionesComponent,AppComponent, DesembolsoTrabajadorComponent, SolicitudesComponent, ModificacionPrecioConectadaComponent, PerfilTrabajadorComponent, DocumentosTrabajadorComponent, SolicitudesTrabajadorComponent, CuentaTrabajadorComponent],
   imports: [
     BrowserModule,
     FormsModule,

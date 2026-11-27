@@ -59,6 +59,7 @@ export class AppComponent implements OnInit, OnDestroy {
   moduloAdministrativo = 'documentacion-trabajador';
   readonly seccionesPorPanel: { [panel: string]: SeccionPanel[] } = {
     'panel-administracion': [
+      { vista: 'moderacion-opiniones', titulo: 'Moderación de opiniones', navTitulo: 'Opiniones', detalle: 'Revisa reportes y resuelve calificaciones.' },
       { vista: 'documentacion-trabajador', titulo: 'Documentación de trabajadores', navTitulo: 'Trabajadores', detalle: 'Revisa los documentos y registra el resultado.' },
       { vista: 'gestion-reclamos', titulo: 'Reclamos formales', navTitulo: 'Reclamos', detalle: 'Analiza los antecedentes y resuelve casos.' },
       { vista: 'revision-pagos', titulo: 'Discrepancias de pago', navTitulo: 'Pagos', detalle: 'Revisa declaraciones de pago en disputa.' },
@@ -228,7 +229,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .some(clave => parametros.get(clave) === '1')) { return true; }
 
     const pantallas = ['perfil-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador',
-      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
+      'moderacion-opiniones', 'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
     const pantalla = parametros.get('vista');
     return !!pantalla && pantallas.includes(pantalla);
   }
@@ -276,7 +277,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.navegar('candidatos-asistencia');
     }
     const pantallas = ['perfil-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador',
-      'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
+      'moderacion-opiniones', 'documentacion-trabajador', 'gestion-reclamos', 'aprobacion-desembolsos'];
     const pantalla = parametros.get('vista');
     if (pantalla && pantallas.includes(pantalla)) { this.navegar(pantalla); }
     this.cargar();
@@ -339,7 +340,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (vista === 'panel-trabajador' || ['perfil-trabajador', 'documentos-trabajador', 'solicitudes-trabajador', 'cuenta-trabajador', 'desembolso-trabajador'].includes(vista)) {
       return this.tieneRol('trabajador');
     }
-    if (vista === 'panel-administracion' || ['documentacion-trabajador', 'gestion-reclamos', 'revision-pagos', 'incidentes', 'aprobacion-desembolsos'].includes(vista)) {
+    if (vista === 'panel-administracion' || ['moderacion-opiniones', 'documentacion-trabajador', 'gestion-reclamos', 'revision-pagos', 'incidentes', 'aprobacion-desembolsos'].includes(vista)) {
       return this.tieneRol('administrador');
     }
     if (vista === 'panel-superadministracion' || ['revisiones-asistencia', 'candidatos-asistencia'].includes(vista)) {
